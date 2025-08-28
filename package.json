@@ -11,27 +11,10 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "main",
-      "title": "Dashboard",
-      "description": "View your Midday account dashboard",
-      "mode": "view"
-    },
-    {
       "name": "transactions",
       "title": "Transactions",
       "description": "View and search your transactions",
       "mode": "view"
-    }
-  ],
-  "preferences": [
-    {
-      "name": "clientId",
-      "title": "Midday Client ID",
-      "description": "Your Midday OAuth Client ID from the developer console",
-      "type": "textfield",
-      "required": true,
-      "placeholder": "mid_client_...",
-      "default": "mid_client_ae0Ldc62GX117eirIjIZnqVD"
     }
   ],
   "dependencies": {
