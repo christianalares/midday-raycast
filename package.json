@@ -1,0 +1,58 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "midday-raycast",
+  "title": "Midday",
+  "description": "Access your Midday transactions and invoices directly from Raycast",
+  "icon": "command-icon.png",
+  "author": "krille",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "main",
+      "title": "Dashboard",
+      "description": "View your Midday account dashboard",
+      "mode": "view"
+    },
+    {
+      "name": "transactions",
+      "title": "Transactions",
+      "description": "View and search your transactions",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "clientId",
+      "title": "Midday Client ID",
+      "description": "Your Midday OAuth Client ID from the developer console",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "mid_client_...",
+      "default": "mid_client_ae0Ldc62GX117eirIjIZnqVD"
+    }
+  ],
+  "dependencies": {
+    "@midday-ai/sdk": "^0.4.0",
+    "@raycast/api": "^1.83.1",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
