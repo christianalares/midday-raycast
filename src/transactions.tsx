@@ -1,32 +1,160 @@
-import { Detail } from '@raycast/api'
+import { Action, ActionPanel, Color, Icon, List, Keyboard } from '@raycast/api'
 
 import { withMiddayClient } from './with-midday-client'
+import { useTransactions } from './hooks/use-transactions'
+import { useCachedState } from '@raycast/utils'
+import { useState } from 'react'
+import { formatCurrency } from './utils'
 
 function TransactionsComponent() {
-  const markdown = `# 🎉 Connected to Midday!
+  const [query, setQuery] = useState<string | undefined>(undefined)
+  const { transations, isLoading, error } = useTransactions(query)
 
-**Status**: ✅ OAuth Authentication Successful  
-**Provider**: Midday API  
+  const [showDetails, setShowDetails] = useCachedState<boolean>('show-details', false, {
+    cacheNamespace: 'midday',
+  })
 
-## Available Commands
+  return (
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Search transactions"
+      isShowingDetail={showDetails}
+      onSearchTextChange={setQuery}
+      throttle={true}
+      // If we want to add more filter options
+      // searchBarAccessory={
+      //   <List.Dropdown tooltip="Filter by status">
+      //     <List.Dropdown.Section title="Test">
+      //       <List.Dropdown.Item title="Test 1" value="test 1" />
+      //       <List.Dropdown.Item title="Test 2" value="test 2" />
+      //     </List.Dropdown.Section>
+      //   </List.Dropdown>
+      // }
+    >
+      {error && (
+        <List.EmptyView
+          title={error.message}
+          description="Please try again"
+          icon={{ source: Icon.Warning, tintColor: Color.Red }}
+        />
+      )}
 
-Your Midday Raycast extension is ready! Available commands:
+      {!error && transations.length === 0 && (
+        <List.EmptyView title="No transactions found!" icon={{ source: Icon.Warning, tintColor: Color.Orange }} />
+      )}
 
-### 📊 **Transactions**
-View and search your transaction history
+      {transations.map(tx => {
+        return (
+          <List.Item
+            key={tx.id}
+            title={tx.name}
+            accessories={[
+              {
+                text: {
+                  value: formatCurrency(tx.amount, tx.currency),
+                  color: tx.amount > 0 ? Color.Green : Color.PrimaryText,
+                },
+              },
+              {
+                date: new Date(tx.date),
+              },
+              {
+                icon:
+                  (tx.attachments ?? []).length > 0
+                    ? { source: Icon.CheckCircle, tintColor: Color.Green }
+                    : { source: Icon.Circle, tintColor: Color.Orange },
+              },
+            ]}
+            detail={
+              <List.Item.Detail
+                metadata={
+                  <List.Item.Detail.Metadata>
+                    <List.Item.Detail.Metadata.Link
+                      title="View on Midday"
+                      text={`https://app.midday.ai/transactions?transactionId=${tx.id}`}
+                      target={`https://app.midday.ai/transactions?transactionId=${tx.id}`}
+                    />
 
-### 🧾 **Invoices** 
-Manage invoices and track payment status
+                    <List.Item.Detail.Metadata.Label
+                      title="Amount"
+                      text={{
+                        value: formatCurrency(tx.amount, tx.currency),
+                        color: tx.amount > 0 ? Color.Green : Color.PrimaryText,
+                      }}
+                    />
 
-### 💰 **Financial Metrics**
-View revenue, spending, and cash flow insights
+                    {tx.category && (
+                      <>
+                        <List.Item.Detail.Metadata.Separator />
 
-### 🏦 **Bank Accounts**
-Monitor account balances and details
+                        <List.Item.Detail.Metadata.Label
+                          title="Category"
+                          text={tx.category.name}
+                          icon={{ source: Icon.Tag, tintColor: tx.category.color }}
+                        />
+                      </>
+                    )}
 
-Ready to manage your finances! 🚀`
+                    {(tx.attachments ?? []).length > 0 ? (
+                      <List.Item.Detail.Metadata.Label
+                        title="Status"
+                        text="Matched"
+                        icon={{ source: Icon.CheckCircle, tintColor: Color.Green }}
+                      />
+                    ) : (
+                      <List.Item.Detail.Metadata.Label
+                        title="Status"
+                        text="Unmatched"
+                        icon={{ source: Icon.Circle, tintColor: Color.Orange }}
+                      />
+                    )}
 
-  return <Detail markdown={markdown} />
+                    {(tx.attachments ?? []).length > 0 && (
+                      <List.Item.Detail.Metadata.TagList title="Attachments">
+                        {(tx.attachments ?? []).map(attachment => {
+                          if (!attachment.filename) {
+                            return null
+                          }
+
+                          return (
+                            <List.Item.Detail.Metadata.TagList.Item key={attachment.id} text={attachment.filename} />
+                          )
+                        })}
+                      </List.Item.Detail.Metadata.TagList>
+                    )}
+
+                    {tx.note && <List.Item.Detail.Metadata.Label title="Note" text={tx.note} />}
+                  </List.Item.Detail.Metadata>
+                }
+              />
+            }
+            actions={
+              <ActionPanel>
+                <Action
+                  title={showDetails ? 'Hide Details' : 'Show Details'}
+                  shortcut={{ modifiers: ['cmd'], key: 'd' }}
+                  onAction={() => setShowDetails(!showDetails)}
+                  icon={showDetails ? Icon.EyeDisabled : Icon.Eye}
+                />
+                <Action.OpenInBrowser
+                  title="View on Midday"
+                  url={`https://app.midday.ai/transactions?transactionId=${tx.id}`}
+                />
+
+                {/* <ActionPanel.Section>
+                  <Action.OpenInBrowser
+                    title="View on Midday"
+                    url={`https://app.midday.ai/transactions?transactionId=${tx.id}`}
+                    shortcut={{ modifiers: ['cmd'], key: 'enter' }}
+                  />
+                </ActionPanel.Section> */}
+              </ActionPanel>
+            }
+          />
+        )
+      })}
+    </List>
+  )
 }
 
 export default withMiddayClient(TransactionsComponent)
