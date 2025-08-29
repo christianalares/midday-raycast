@@ -1,18 +1,18 @@
-import { Action, ActionPanel, Color, Icon, List, Keyboard } from '@raycast/api'
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 
-import { withMiddayClient } from './with-midday-client'
-import { useTransactions } from './hooks/use-transactions'
-import { useCachedState } from '@raycast/utils'
-import { useState } from 'react'
-import { formatCurrency } from './utils'
+import { withMiddayClient } from "./with-midday-client";
+import { useTransactions } from "./hooks/use-transactions";
+import { useCachedState } from "@raycast/utils";
+import { useState } from "react";
+import { formatCurrency } from "./utils";
 
 function TransactionsComponent() {
-  const [query, setQuery] = useState<string | undefined>(undefined)
-  const { transations, isLoading, error } = useTransactions(query)
+  const [query, setQuery] = useState<string | undefined>(undefined);
+  const { transations, isLoading, error } = useTransactions(query);
 
-  const [showDetails, setShowDetails] = useCachedState<boolean>('show-details', false, {
-    cacheNamespace: 'midday',
-  })
+  const [showDetails, setShowDetails] = useCachedState<boolean>("show-details", false, {
+    cacheNamespace: "midday",
+  });
 
   return (
     <List
@@ -43,7 +43,7 @@ function TransactionsComponent() {
         <List.EmptyView title="No transactions found!" icon={{ source: Icon.Warning, tintColor: Color.Orange }} />
       )}
 
-      {transations.map(tx => {
+      {transations.map((tx) => {
         return (
           <List.Item
             key={tx.id}
@@ -111,14 +111,14 @@ function TransactionsComponent() {
 
                     {(tx.attachments ?? []).length > 0 && (
                       <List.Item.Detail.Metadata.TagList title="Attachments">
-                        {(tx.attachments ?? []).map(attachment => {
+                        {(tx.attachments ?? []).map((attachment) => {
                           if (!attachment.filename) {
-                            return null
+                            return null;
                           }
 
                           return (
                             <List.Item.Detail.Metadata.TagList.Item key={attachment.id} text={attachment.filename} />
-                          )
+                          );
                         })}
                       </List.Item.Detail.Metadata.TagList>
                     )}
@@ -131,8 +131,8 @@ function TransactionsComponent() {
             actions={
               <ActionPanel>
                 <Action
-                  title={showDetails ? 'Hide Details' : 'Show Details'}
-                  shortcut={{ modifiers: ['cmd'], key: 'd' }}
+                  title={showDetails ? "Hide Details" : "Show Details"}
+                  shortcut={{ modifiers: ["cmd"], key: "d" }}
                   onAction={() => setShowDetails(!showDetails)}
                   icon={showDetails ? Icon.EyeDisabled : Icon.Eye}
                 />
@@ -151,10 +151,10 @@ function TransactionsComponent() {
               </ActionPanel>
             }
           />
-        )
+        );
       })}
     </List>
-  )
+  );
 }
 
-export default withMiddayClient(TransactionsComponent)
+export default withMiddayClient(TransactionsComponent);

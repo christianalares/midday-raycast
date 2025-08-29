@@ -1,20 +1,20 @@
-import { Midday } from '@midday-ai/sdk'
-import { getAccessToken } from '@raycast/utils'
+import { Midday } from "@midday-ai/sdk";
+import { getAccessToken } from "@raycast/utils";
 
 /**
  * Get a configured Midday SDK client with the current access token
  * @returns Configured Midday client ready for API calls
  */
 export function getMiddayClient(): Midday {
-  const { token } = getAccessToken()
+  const { token } = getAccessToken();
 
   return new Midday({
     security: {
       oauth2: token,
     },
     // Add any other Midday SDK configuration here
-    serverURL: 'https://api.midday.ai', // Use when available
-  })
+    serverURL: "https://api.midday.ai", // Use when available
+  });
 }
 
 /**
