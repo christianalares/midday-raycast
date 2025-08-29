@@ -23,7 +23,6 @@ export const middayOAuth = new OAuthService({
   onAuthorize({ token }) {
     midday = new Midday({
       security: {
-        // oauth2: token,
         token,
       },
     });
@@ -31,11 +30,6 @@ export const middayOAuth = new OAuthService({
 });
 
 export function getMiddayClient() {
-  // return {
-  //   getTransactions: async () => {
-  //     return []
-  //   },
-  // }
   if (!midday) {
     throw new Error("No Midday client initialized. Please connect your Midday account.");
   }

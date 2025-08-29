@@ -10,3 +10,16 @@ export const getTransactions = async (query?: string) => {
 
   return transactions.data;
 };
+
+export const getSpendings = async ({ from, to }: { from: Date; to: Date }) => {
+  const midday = getMiddayClient();
+
+  // Set default date range if not provided (last 30 days)
+
+  const spendings = await midday.metrics.spending({
+    from: from.toISOString().split("T")[0],
+    to: to.toISOString().split("T")[0],
+  });
+
+  return spendings;
+};

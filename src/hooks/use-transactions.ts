@@ -18,7 +18,7 @@ export const useTransactions = (query?: string) => {
   );
 
   return {
-    transations: data ?? [],
+    transactions: data ?? [],
     isLoading: (!data && !error) || isLoading,
     error,
   };

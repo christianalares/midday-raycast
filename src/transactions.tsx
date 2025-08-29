@@ -8,7 +8,7 @@ import { formatCurrency } from "./utils";
 
 function TransactionsComponent() {
   const [query, setQuery] = useState<string | undefined>(undefined);
-  const { transations, isLoading, error } = useTransactions(query);
+  const { transactions, isLoading, error } = useTransactions(query);
 
   const [showDetails, setShowDetails] = useCachedState<boolean>("show-details", false, {
     cacheNamespace: "midday",
@@ -21,15 +21,6 @@ function TransactionsComponent() {
       isShowingDetail={showDetails}
       onSearchTextChange={setQuery}
       throttle={true}
-      // If we want to add more filter options
-      // searchBarAccessory={
-      //   <List.Dropdown tooltip="Filter by status">
-      //     <List.Dropdown.Section title="Test">
-      //       <List.Dropdown.Item title="Test 1" value="test 1" />
-      //       <List.Dropdown.Item title="Test 2" value="test 2" />
-      //     </List.Dropdown.Section>
-      //   </List.Dropdown>
-      // }
     >
       {error && (
         <List.EmptyView
@@ -39,11 +30,11 @@ function TransactionsComponent() {
         />
       )}
 
-      {!error && transations.length === 0 && (
+      {!error && transactions.length === 0 && (
         <List.EmptyView title="No transactions found!" icon={{ source: Icon.Warning, tintColor: Color.Orange }} />
       )}
 
-      {transations.map((tx) => {
+      {transactions.map((tx) => {
         return (
           <List.Item
             key={tx.id}
