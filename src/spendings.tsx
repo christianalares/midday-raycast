@@ -15,53 +15,48 @@ import {
   subDays,
 } from "date-fns";
 
-const DATE_FILTERS = [
-  { label: "Last 30 days", value: "last30Days" },
-  { label: "This month", value: "thisMonth" },
-  { label: "Last month", value: "lastMonth" },
-  { label: "This year", value: "thisYear" },
-  { label: "Last year", value: "lastYear" },
-] as const;
-
-type DateFilter = (typeof DATE_FILTERS)[number]["value"];
-
-const getDateFilter = (value: DateFilter) => {
-  switch (value) {
-    case "last30Days":
-      return {
-        from: startOfDay(subDays(new Date(), 30)),
-        to: endOfDay(new Date()),
-      };
-    case "thisMonth":
-      return {
-        from: startOfMonth(new Date()),
-        to: endOfDay(new Date()),
-      };
-    case "lastMonth":
-      return {
-        from: startOfMonth(subMonths(new Date(), 1)),
-        to: endOfMonth(subMonths(new Date(), 1)),
-      };
-    case "thisYear":
-      return {
-        from: startOfYear(new Date()),
-        to: endOfYear(new Date()),
-      };
-    case "lastYear":
-      return {
-        from: startOfYear(subYears(new Date(), 1)),
-        to: endOfYear(subYears(new Date(), 1)),
-      };
-    default:
-      return {
-        from: startOfDay(subDays(new Date(), 30)),
-        to: endOfDay(new Date()),
-      };
-  }
+type DateFilter = {
+  value: string;
+  label: string;
+  from: Date;
+  to: Date;
 };
 
+const DATE_FILTERS: DateFilter[] = [
+  {
+    value: "last30Days",
+    label: "Last 30 days",
+    from: startOfDay(subDays(new Date(), 30)),
+    to: endOfDay(new Date()),
+  },
+  {
+    value: "thisMonth",
+    label: "This month",
+    from: startOfMonth(new Date()),
+    to: endOfDay(new Date()),
+  },
+  {
+    value: "lastMonth",
+    label: "Last month",
+    from: startOfMonth(subMonths(new Date(), 1)),
+    to: endOfMonth(subMonths(new Date(), 1)),
+  },
+  {
+    value: "thisYear",
+    label: "This year",
+    from: startOfYear(new Date()),
+    to: endOfYear(new Date()),
+  },
+  {
+    value: "lastYear",
+    label: "Last year",
+    from: startOfYear(subYears(new Date(), 1)),
+    to: endOfYear(subYears(new Date(), 1)),
+  },
+];
+
 function TransactionsComponent() {
-  const [dateFilter, setDateFilter] = useState(getDateFilter("last30Days"));
+  const [dateFilter, setDateFilter] = useState(DATE_FILTERS[0]);
   const { spendings, isLoading, error } = useSpendings({ from: dateFilter.from, to: dateFilter.to });
 
   return (
@@ -73,7 +68,13 @@ function TransactionsComponent() {
         <List.Dropdown
           tooltip="Filter by status"
           onChange={(value) => {
-            setDateFilter(getDateFilter(value as DateFilter));
+            const foundFilter = DATE_FILTERS.find((filter) => filter.value === value);
+
+            if (!foundFilter) {
+              return;
+            }
+
+            setDateFilter(foundFilter);
           }}
         >
           <List.Dropdown.Section>
