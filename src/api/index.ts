@@ -130,7 +130,23 @@ export const getTrackerProjects = async () => {
     };
   });
 
-  // console.log(trackerProjectsWithTimer);
-
   return trackerProjectsWithTimer;
+};
+
+export const startTrackerTimer = async (projectId: string) => {
+  const midday = getMiddayClient();
+
+  const startedTimer = await midday.trackerTimer.startTimer({
+    projectId,
+  });
+
+  return startedTimer.data;
+};
+
+export const stopTrackerTimer = async () => {
+  const midday = getMiddayClient();
+
+  const stoppedTimer = await midday.trackerTimer.stopTimer({});
+
+  return stoppedTimer.data;
 };

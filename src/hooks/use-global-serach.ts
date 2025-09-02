@@ -2,7 +2,7 @@ import { useCachedPromise } from "@raycast/utils";
 import { globalSearch } from "../api";
 
 export const useGlobalSearch = (query?: string) => {
-  const { data, isLoading, error } = useCachedPromise(
+  const { data, isLoading, error, revalidate } = useCachedPromise(
     async (_query?: string) => {
       const search = await globalSearch(_query);
 
@@ -21,5 +21,6 @@ export const useGlobalSearch = (query?: string) => {
     search: data ?? [],
     isLoading: (!data && !error) || isLoading,
     error,
+    revalidate,
   };
 };

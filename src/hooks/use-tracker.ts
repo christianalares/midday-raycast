@@ -2,10 +2,11 @@ import { useCachedPromise } from "@raycast/utils";
 import { getTrackerProjects } from "../api";
 
 export const useTrackerProjects = () => {
-  const { data, isLoading, error } = useCachedPromise(
+  const { data, isLoading, error, revalidate } = useCachedPromise(
     async () => {
+      console.log("Fetching tracker projects...");
       const search = await getTrackerProjects();
-
+      console.log("Fetched tracker projects:", search.length, "projects");
       return search;
     },
     [],
@@ -17,9 +18,15 @@ export const useTrackerProjects = () => {
     },
   );
 
+  const enhancedRevalidate = () => {
+    console.log("Enhanced revalidate called...");
+    revalidate();
+  };
+
   return {
     trackerProjects: data ?? [],
     isLoading: (!data && !error) || isLoading,
     error,
+    revalidate: enhancedRevalidate,
   };
 };

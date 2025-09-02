@@ -1,11 +1,24 @@
-import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  captureException,
+  Color,
+  Icon,
+  Image,
+  List,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
 import { useTrackerProjects } from "./hooks/use-tracker";
 import { withMiddayClient } from "./with-midday-client";
 import { useEffect, useState } from "react";
 import { formatCurrency, formatDurationFromSeconds, formatTimerDuration } from "./utils";
+import { startTrackerTimer, stopTrackerTimer } from "./api";
+import { showFailureToast } from "@raycast/utils";
 
 const Tracker = () => {
-  const { trackerProjects, isLoading, error } = useTrackerProjects();
+  const { trackerProjects, isLoading, error, revalidate } = useTrackerProjects();
   const [showDetails, setShowDetails] = useState(false);
 
   return (
@@ -29,6 +42,7 @@ const Tracker = () => {
             project={project}
             showDetails={showDetails}
             setShowDetails={setShowDetails}
+            revalidate={revalidate}
           />
         );
       })}
@@ -40,12 +54,61 @@ type ProjectListItemProps = {
   project: ReturnType<typeof useTrackerProjects>["trackerProjects"][number];
   showDetails: boolean;
   setShowDetails: (showDetails: boolean) => void;
+  revalidate: () => void;
 };
 
-const ProjectListItem = ({ project, showDetails, setShowDetails }: ProjectListItemProps) => {
+const ProjectListItem = ({ project, showDetails, setShowDetails, revalidate }: ProjectListItemProps) => {
   const [elapsedTimer, setElapsedTimer] = useState(project.timer?.elapsedTime);
 
   const assignedTo = project.users?.at(0);
+
+  const handleStartTimer = async () => {
+    await showToast({ style: Toast.Style.Animated, title: "Starting timer..." });
+
+    startTrackerTimer(project.id)
+      .then(async (startedTimer) => {
+        await showToast({
+          style: Toast.Style.Success,
+          title: "✅ Timer started",
+          message: `Timer started for ${startedTimer.project.name}`,
+        });
+
+        // Add small delay to ensure backend has updated
+        setTimeout(() => {
+          console.log("Calling revalidate after timer start...");
+          revalidate();
+        }, 500);
+      })
+      .catch(async (err) => {
+        captureException(err);
+
+        await showFailureToast(err, { title: "❗ Failed to start timer" });
+      });
+  };
+
+  const handleStopTimer = async () => {
+    await showToast({ style: Toast.Style.Animated, title: "Stopping timer..." });
+
+    stopTrackerTimer()
+      .then(async (stoppedTimer) => {
+        await showToast({
+          style: Toast.Style.Success,
+          title: "✅ Timer stopped",
+          message: `Timer stopped for ${stoppedTimer.project.name}`,
+        });
+
+        // Add small delay to ensure backend has updated
+        setTimeout(() => {
+          console.log("Calling revalidate after timer stop...");
+          revalidate();
+        }, 500);
+      })
+      .catch(async (err) => {
+        captureException(err);
+
+        await showFailureToast(err, { title: "❗ Failed to stop timer" });
+      });
+  };
 
   useEffect(() => {
     let timer: NodeJS.Timeout | null = null;
@@ -138,17 +201,27 @@ const ProjectListItem = ({ project, showDetails, setShowDetails }: ProjectListIt
           />
 
           <ActionPanel.Section>
-            <Action
-              title="Start timer"
-              onAction={() => {
-                console.log("start timer");
-              }}
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
-              icon={{
-                source: Icon.CircleProgress100,
-                tintColor: Color.Red,
-              }}
-            />
+            {elapsedTimer ? (
+              <Action
+                title="Stop timer"
+                onAction={handleStopTimer}
+                shortcut={{ modifiers: ["cmd"], key: "r" }}
+                icon={{
+                  source: Icon.Stop,
+                  tintColor: Color.Red,
+                }}
+              />
+            ) : (
+              <Action
+                title="Start timer"
+                onAction={handleStartTimer}
+                shortcut={{ modifiers: ["cmd"], key: "r" }}
+                icon={{
+                  source: Icon.CircleProgress100,
+                  tintColor: Color.Red,
+                }}
+              />
+            )}
           </ActionPanel.Section>
         </ActionPanel>
       }
