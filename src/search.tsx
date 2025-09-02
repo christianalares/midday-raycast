@@ -1,10 +1,9 @@
-import { Color, Icon, List, Action, ActionPanel } from "@raycast/api";
-import { withMiddayClient } from "./with-midday-client";
-import { useGlobalSearch } from "./hooks/use-global-serach";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useState } from "react";
-import { formatCurrency } from "./utils";
 import CreateCustomer from "./create-customer";
+import { useGlobalSearch } from "./hooks/use-global-serach";
 import TransactionsComponent from "./transactions";
+import { withMiddayClient } from "./with-midday-client";
 
 const Search = () => {
   const [query, setQuery] = useState("");
