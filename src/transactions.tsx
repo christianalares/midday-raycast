@@ -1,13 +1,16 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 
+import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { useTransactions } from "./hooks/use-transactions";
-import { formatCurrency } from "./utils";
-import { withMiddayClient } from "./with-midday-client";
+import { getQueryOptions } from "./api/queries";
+import { formatCurrency } from "./lib/utils";
+import { withMiddayClient } from "./lib/with-midday-client";
 
 function TransactionsComponent() {
   const [query, setQuery] = useState<string | undefined>(undefined);
-  const { transactions, isLoading, error } = useTransactions(query);
+  const { data, isLoading, error } = useQuery(getQueryOptions.transactions(query));
+
+  const transactions = data ?? [];
 
   const [showDetails, setShowDetails] = useState(false);
 

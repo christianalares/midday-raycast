@@ -1,4 +1,5 @@
-import { Country } from "../utils/countries";
+import { captureException } from "@raycast/api";
+import { Country } from "../lib/countries";
 import { getGlobalToken, getMiddayClient } from "./oauth";
 
 type Prettify<T> = {
@@ -19,10 +20,17 @@ export const getTransactions = async (query?: string) => {
 export const getSpendings = async ({ from, to }: { from: Date; to: Date }) => {
   const midday = getMiddayClient();
 
-  const spendings = await midday.metrics.spending({
-    from: from.toISOString().split("T")[0],
-    to: to.toISOString().split("T")[0],
-  });
+  const spendings = await midday.metrics
+    .spending({
+      from: from.toISOString().split("T")[0],
+      to: to.toISOString().split("T")[0],
+    })
+    .catch((err) => {
+      console.log(err);
+      captureException(err);
+
+      throw err;
+    });
 
   return spendings;
 };
@@ -118,6 +126,8 @@ export const createCustomer = async (args: CreateCustomerArgs) => {
 
 export const getTrackerProjects = async () => {
   const midday = getMiddayClient();
+
+  console.log("FETCHING TRACKER PROJECTS");
 
   const trackerProjects = await midday.trackerProjects.list({});
 

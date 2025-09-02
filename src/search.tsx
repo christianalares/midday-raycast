@@ -1,13 +1,16 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useState } from "react";
 import CreateCustomer from "./create-customer";
-import { useGlobalSearch } from "./hooks/use-global-serach";
 import TransactionsComponent from "./transactions";
-import { withMiddayClient } from "./with-midday-client";
+import { withMiddayClient } from "./lib/with-midday-client";
+import { useQuery } from "@tanstack/react-query";
+import { getQueryOptions, type QueryResults } from "./api/queries";
 
 const Search = () => {
   const [query, setQuery] = useState("");
-  const { search, isLoading, error } = useGlobalSearch(query);
+  const { data, isLoading, error } = useQuery(getQueryOptions.globalSearch(query));
+
+  const search = data ?? [];
 
   const vaultResults = search.filter((result) => result.type === "vault");
   const customerResults = search.filter((result) => result.type === "customer");
@@ -44,7 +47,7 @@ const Search = () => {
   );
 };
 
-type ResultItem = ReturnType<typeof useGlobalSearch>["search"][number];
+type ResultItem = QueryResults.GlobalSearch[number];
 type ListResultsByType<T extends ResultItem["type"]> = Array<Extract<ResultItem, { type: T }>>;
 
 const VaultList = ({ results }: { results: ListResultsByType<"vault"> }) => {

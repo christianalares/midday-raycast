@@ -1,19 +1,20 @@
 import { Color, Icon, List } from "@raycast/api";
-import { useSpendings } from "./hooks/use-spendings";
-import { formatCurrency } from "./utils";
-import { withMiddayClient } from "./with-midday-client";
-import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
-  startOfMonth,
-  endOfMonth,
-  startOfYear,
-  endOfYear,
   endOfDay,
+  endOfMonth,
+  endOfYear,
+  startOfDay,
+  startOfMonth,
+  startOfYear,
+  subDays,
   subMonths,
   subYears,
-  startOfDay,
-  subDays,
 } from "date-fns";
+import { useState } from "react";
+import { getQueryOptions } from "./api/queries";
+import { formatCurrency } from "./lib/utils";
+import { withMiddayClient } from "./lib/with-midday-client";
 
 type DateFilter = {
   value: string;
@@ -57,7 +58,8 @@ const DATE_FILTERS: DateFilter[] = [
 
 function TransactionsComponent() {
   const [dateFilter, setDateFilter] = useState(DATE_FILTERS[0]);
-  const { spendings, isLoading, error } = useSpendings({ from: dateFilter.from, to: dateFilter.to });
+  const { data, isLoading, error } = useQuery(getQueryOptions.spendings({ from: dateFilter.from, to: dateFilter.to }));
+  const spendings = data ?? [];
 
   return (
     <List

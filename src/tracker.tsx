@@ -1,24 +1,15 @@
-import {
-  Action,
-  ActionPanel,
-  captureException,
-  Color,
-  Icon,
-  Image,
-  List,
-  showToast,
-  Toast,
-  useNavigation,
-} from "@raycast/api";
-import { useTrackerProjects } from "./hooks/use-tracker";
-import { withMiddayClient } from "./with-midday-client";
-import { useEffect, useState } from "react";
-import { formatCurrency, formatDurationFromSeconds, formatTimerDuration } from "./utils";
-import { startTrackerTimer, stopTrackerTimer } from "./api";
+import { Action, ActionPanel, captureException, Color, Icon, Image, List, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { startTrackerTimer, stopTrackerTimer } from "./api";
+import { type QueryResults, getQueryOptions } from "./api/queries";
+import { formatCurrency, formatDurationFromSeconds, formatTimerDuration } from "./lib/utils";
+import { withMiddayClient } from "./lib/with-midday-client";
 
 const Tracker = () => {
-  const { trackerProjects, isLoading, error, revalidate } = useTrackerProjects();
+  const { data: trackerProjects, isLoading, error } = useQuery(getQueryOptions.trackerProjects());
+
   const [showDetails, setShowDetails] = useState(false);
 
   return (
@@ -31,18 +22,17 @@ const Tracker = () => {
         />
       )}
 
-      {!error && trackerProjects.length === 0 && (
+      {!error && trackerProjects?.length === 0 && (
         <List.EmptyView title="No spendings found!" icon={{ source: Icon.Warning, tintColor: Color.Orange }} />
       )}
 
-      {trackerProjects.map((project) => {
+      {trackerProjects?.map((project) => {
         return (
           <ProjectListItem
             key={project.id}
             project={project}
             showDetails={showDetails}
             setShowDetails={setShowDetails}
-            revalidate={revalidate}
           />
         );
       })}
@@ -51,13 +41,13 @@ const Tracker = () => {
 };
 
 type ProjectListItemProps = {
-  project: ReturnType<typeof useTrackerProjects>["trackerProjects"][number];
+  project: QueryResults.TrackerProjects[number];
   showDetails: boolean;
   setShowDetails: (showDetails: boolean) => void;
-  revalidate: () => void;
 };
 
-const ProjectListItem = ({ project, showDetails, setShowDetails, revalidate }: ProjectListItemProps) => {
+const ProjectListItem = ({ project, showDetails, setShowDetails }: ProjectListItemProps) => {
+  const queryClient = useQueryClient();
   const [elapsedTimer, setElapsedTimer] = useState(project.timer?.elapsedTime);
 
   const assignedTo = project.users?.at(0);
@@ -73,11 +63,8 @@ const ProjectListItem = ({ project, showDetails, setShowDetails, revalidate }: P
           message: `Timer started for ${startedTimer.project.name}`,
         });
 
-        // Add small delay to ensure backend has updated
-        setTimeout(() => {
-          console.log("Calling revalidate after timer start...");
-          revalidate();
-        }, 500);
+        console.log("Calling revalidate after timer start...");
+        queryClient.invalidateQueries({ queryKey: ["tracker-projects"] });
       })
       .catch(async (err) => {
         captureException(err);
@@ -97,11 +84,8 @@ const ProjectListItem = ({ project, showDetails, setShowDetails, revalidate }: P
           message: `Timer stopped for ${stoppedTimer.project.name}`,
         });
 
-        // Add small delay to ensure backend has updated
-        setTimeout(() => {
-          console.log("Calling revalidate after timer stop...");
-          revalidate();
-        }, 500);
+        console.log("Calling revalidate after timer stop...");
+        queryClient.invalidateQueries({ queryKey: ["tracker-projects"] });
       })
       .catch(async (err) => {
         captureException(err);

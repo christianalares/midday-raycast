@@ -1,8 +1,8 @@
 import { Action, ActionPanel, captureException, Form, showToast, Toast } from "@raycast/api";
-import { withMiddayClient } from "./with-midday-client";
+import { withMiddayClient } from "./lib/with-midday-client";
 import { FormValidation, useForm } from "@raycast/utils";
 import { createCustomer, CreateCustomerArgs } from "./api";
-import { countries } from "./utils/countries";
+import { countries } from "./lib/countries";
 
 // Helper function to clean form props by converting null to undefined
 const cleanFormProps = (props: any) => ({
