@@ -12,6 +12,12 @@
   "license": "MIT",
   "commands": [
     {
+      "name": "search",
+      "title": "Search",
+      "description": "Search your transactions and invoices",
+      "mode": "view"
+    },
+    {
       "name": "transactions",
       "title": "Transactions",
       "description": "View and search your transactions",
@@ -21,6 +27,12 @@
       "name": "spendings",
       "title": "Spendings",
       "description": "View your spendings",
+      "mode": "view"
+    },
+    {
+      "name": "tracker",
+      "title": "Tracker",
+      "description": "Manage your tracker",
       "mode": "view"
     }
   ],

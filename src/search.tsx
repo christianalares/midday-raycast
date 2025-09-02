@@ -1,0 +1,189 @@
+import { Color, Icon, List, Action, ActionPanel } from "@raycast/api";
+import { withMiddayClient } from "./with-midday-client";
+import { useGlobalSearch } from "./hooks/use-global-serach";
+import { useState } from "react";
+import { formatCurrency } from "./utils";
+import CreateCustomer from "./create-customer";
+import TransactionsComponent from "./transactions";
+
+const Search = () => {
+  const [query, setQuery] = useState("");
+  const { search, isLoading, error } = useGlobalSearch(query);
+
+  const vaultResults = search.filter((result) => result.type === "vault");
+  const customerResults = search.filter((result) => result.type === "customer");
+  const invoicesResults = search.filter((result) => result.type === "invoice");
+  const transactionResults = search.filter((result) => result.type === "transaction");
+  const inboxResults = search.filter((result) => result.type === "inbox");
+
+  return (
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Search transactions"
+      onSearchTextChange={setQuery}
+      throttle={true}
+    >
+      {error && (
+        <List.EmptyView
+          title={error.message}
+          description="Please try again"
+          icon={{ source: Icon.Warning, tintColor: Color.Red }}
+        />
+      )}
+
+      {!error && search.length === 0 && (
+        <List.EmptyView title="No search results found!" icon={{ source: Icon.Warning, tintColor: Color.Orange }} />
+      )}
+
+      <VaultList results={vaultResults} />
+      <CustomersList results={customerResults} />
+      <InvoicesList results={invoicesResults} />
+      <TransactionsList results={transactionResults} />
+      {/* TODO: Add tracker */}
+      <InboxList results={inboxResults} />
+    </List>
+  );
+};
+
+type ResultItem = ReturnType<typeof useGlobalSearch>["search"][number];
+type ListResultsByType<T extends ResultItem["type"]> = Array<Extract<ResultItem, { type: T }>>;
+
+const VaultList = ({ results }: { results: ListResultsByType<"vault"> }) => {
+  return (
+    <List.Section title="Vault">
+      {results.map((result) => (
+        <List.Item key={result.id} title={result.data.path_tokens.at(-1) ?? ""} icon={Icon.Document} />
+      ))}
+
+      <List.Item
+        title="View vault"
+        icon={{
+          source: Icon.ArrowNe,
+          tintColor: Color.SecondaryText,
+        }}
+        actions={
+          <ActionPanel>
+            <Action.OpenInBrowser url="https://app.midday.ai/vault" title="View vault on Midday" />
+          </ActionPanel>
+        }
+      />
+    </List.Section>
+  );
+};
+
+const CustomersList = ({ results }: { results: ListResultsByType<"customer"> }) => {
+  return (
+    <List.Section title="Customers">
+      {results.map((result) => (
+        <List.Item
+          key={result.id}
+          title={result.data.name}
+          icon={Icon.Person}
+          accessories={[
+            {
+              text: result.data.email,
+            },
+          ]}
+        />
+      ))}
+
+      <List.Item
+        title="Create customer"
+        icon={{
+          source: Icon.PlusCircle,
+          tintColor: Color.SecondaryText,
+        }}
+        actions={
+          <ActionPanel>
+            <Action.Push title="Create Customer" target={<CreateCustomer />} />
+          </ActionPanel>
+        }
+      />
+      <List.Item
+        title="View customers"
+        icon={{
+          source: Icon.ArrowNe,
+          tintColor: Color.SecondaryText,
+        }}
+        actions={
+          <ActionPanel>
+            <Action.OpenInBrowser url="https://app.midday.ai/customers" title="View customers on Midday" />
+          </ActionPanel>
+        }
+      />
+    </List.Section>
+  );
+};
+
+const InvoicesList = ({ results }: { results: ListResultsByType<"invoice"> }) => {
+  return (
+    <List.Section title="Invoices">
+      {results.map((result) => (
+        <List.Item key={result.id} title={result.data.customer_name} icon={Icon.Document} />
+      ))}
+
+      {/* TODO: Add create invoice */}
+      {/* <List.Item title="Create invoice" icon={Icon.ArrowNe} /> */}
+
+      <List.Item
+        title="View invoices"
+        icon={{
+          source: Icon.ArrowNe,
+          tintColor: Color.SecondaryText,
+        }}
+        actions={
+          <ActionPanel>
+            <Action.OpenInBrowser url="https://app.midday.ai/invoices" title="View invoices on Midday" />
+          </ActionPanel>
+        }
+      />
+    </List.Section>
+  );
+};
+
+const TransactionsList = ({ results }: { results: ListResultsByType<"transaction"> }) => {
+  return (
+    <List.Section title="Transactions">
+      {results.map((result) => (
+        <List.Item key={result.id} title={result.data.name} icon={Icon.List} />
+      ))}
+
+      {/*  */}
+      {/* <List.Item title="Create transaction" icon={Icon.ArrowNe} /> */}
+      <List.Item
+        title="View transactions"
+        icon={{
+          source: Icon.ArrowRight,
+          tintColor: Color.SecondaryText,
+        }}
+        actions={
+          <ActionPanel>
+            <Action.Push title="View Transactions" target={<TransactionsComponent />} />
+          </ActionPanel>
+        }
+      />
+    </List.Section>
+  );
+};
+
+const InboxList = ({ results }: { results: ListResultsByType<"inbox"> }) => {
+  return (
+    <List.Section title="Inbox">
+      {results.map((result) => (
+        <List.Item key={result.id} title={result.data.file_name} icon={Icon.Document} />
+      ))}
+
+      <List.Item
+        title="View inbox"
+        icon={Icon.ArrowNe}
+        actions={
+          <ActionPanel>
+            <Action.OpenInBrowser url="https://app.midday.ai/inbox" title="View inbox on Midday" />
+          </ActionPanel>
+        }
+      />
+    </List.Section>
+  );
+};
+
+export default withMiddayClient(Search);

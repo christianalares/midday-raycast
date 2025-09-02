@@ -1,18 +1,15 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 
-import { withMiddayClient } from "./with-midday-client";
-import { useTransactions } from "./hooks/use-transactions";
-import { useCachedState } from "@raycast/utils";
 import { useState } from "react";
+import { useTransactions } from "./hooks/use-transactions";
 import { formatCurrency } from "./utils";
+import { withMiddayClient } from "./with-midday-client";
 
 function TransactionsComponent() {
   const [query, setQuery] = useState<string | undefined>(undefined);
   const { transactions, isLoading, error } = useTransactions(query);
 
-  const [showDetails, setShowDetails] = useCachedState<boolean>("show-details", false, {
-    cacheNamespace: "midday",
-  });
+  const [showDetails, setShowDetails] = useState(false);
 
   return (
     <List
@@ -123,7 +120,6 @@ function TransactionsComponent() {
               <ActionPanel>
                 <Action
                   title={showDetails ? "Hide Details" : "Show Details"}
-                  shortcut={{ modifiers: ["cmd"], key: "d" }}
                   onAction={() => setShowDetails(!showDetails)}
                   icon={showDetails ? Icon.EyeDisabled : Icon.Eye}
                 />

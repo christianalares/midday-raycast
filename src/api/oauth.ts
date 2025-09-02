@@ -3,6 +3,7 @@ import { OAuthService } from "@raycast/utils";
 import { Midday } from "@midday-ai/sdk";
 
 let midday: Midday | null = null;
+let globalToken = "";
 
 const client = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
@@ -21,6 +22,7 @@ export const middayOAuth = new OAuthService({
   refreshTokenUrl: "https://api.midday.ai/oauth/token",
   bodyEncoding: "json",
   onAuthorize({ token }) {
+    globalToken = token;
     midday = new Midday({
       security: {
         token,
@@ -28,6 +30,10 @@ export const middayOAuth = new OAuthService({
     });
   },
 });
+
+export function getGlobalToken() {
+  return globalToken;
+}
 
 export function getMiddayClient() {
   if (!midday) {
