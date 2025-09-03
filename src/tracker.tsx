@@ -3,12 +3,12 @@ import { showFailureToast } from "@raycast/utils";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { startTrackerTimer, stopTrackerTimer } from "./api";
-import { type QueryResults, getQueryOptions } from "./api/queries";
+import { type QueryResults, queryKeys } from "./api/queries";
 import { formatCurrency, formatDurationFromSeconds, formatTimerDuration } from "./lib/utils";
 import { withMiddayClient } from "./lib/with-midday-client";
 
 const Tracker = () => {
-  const { data: trackerProjects, isLoading, error } = useQuery(getQueryOptions.trackerProjects());
+  const { data: trackerProjects, isLoading, error } = useQuery(queryKeys.trackerProjects.list());
 
   const [showDetails, setShowDetails] = useState(false);
 
@@ -41,7 +41,7 @@ const Tracker = () => {
 };
 
 type ProjectListItemProps = {
-  project: QueryResults.TrackerProjects[number];
+  project: QueryResults["trackerProjects"]["list"][number];
   showDetails: boolean;
   setShowDetails: (showDetails: boolean) => void;
 };

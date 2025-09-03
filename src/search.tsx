@@ -4,11 +4,11 @@ import CreateCustomer from "./create-customer";
 import TransactionsComponent from "./transactions";
 import { withMiddayClient } from "./lib/with-midday-client";
 import { useQuery } from "@tanstack/react-query";
-import { getQueryOptions, type QueryResults } from "./api/queries";
+import { queryKeys, type QueryResults } from "./api/queries";
 
 const Search = () => {
   const [query, setQuery] = useState("");
-  const { data, isLoading, error } = useQuery(getQueryOptions.globalSearch(query));
+  const { data, isLoading, error } = useQuery(queryKeys.globalSearch.list(query));
 
   const search = data ?? [];
 
@@ -47,7 +47,7 @@ const Search = () => {
   );
 };
 
-type ResultItem = QueryResults.GlobalSearch[number];
+type ResultItem = QueryResults["globalSearch"]["list"][number];
 type ListResultsByType<T extends ResultItem["type"]> = Array<Extract<ResultItem, { type: T }>>;
 
 const VaultList = ({ results }: { results: ListResultsByType<"vault"> }) => {

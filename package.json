@@ -37,6 +37,7 @@
     }
   ],
   "dependencies": {
+    "@lukemorales/query-key-factory": "^1.3.4",
     "@midday-ai/sdk": "^0.4.0",
     "@raycast/api": "^1.102.6",
     "@raycast/utils": "^1.17.0",

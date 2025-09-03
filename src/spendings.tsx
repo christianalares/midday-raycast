@@ -12,7 +12,7 @@ import {
   subYears,
 } from "date-fns";
 import { useState } from "react";
-import { getQueryOptions } from "./api/queries";
+import { queryKeys } from "./api/queries";
 import { formatCurrency } from "./lib/utils";
 import { withMiddayClient } from "./lib/with-midday-client";
 
@@ -58,7 +58,7 @@ const DATE_FILTERS: DateFilter[] = [
 
 function TransactionsComponent() {
   const [dateFilter, setDateFilter] = useState(DATE_FILTERS[0]);
-  const { data, isLoading, error } = useQuery(getQueryOptions.spendings({ from: dateFilter.from, to: dateFilter.to }));
+  const { data, isLoading, error } = useQuery(queryKeys.spendings.list({ from: dateFilter.from, to: dateFilter.to }));
   const spendings = data ?? [];
 
   return (
