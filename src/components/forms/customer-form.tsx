@@ -19,8 +19,6 @@ type Props = {
 }
 
 export const CustomerForm = ({ onSubmit, initialValues, ctaText, isLoading }: Props) => {
-  console.log(initialValues)
-
   const form = useForm<CreateCustomerArgs>({
     onSubmit: onSubmit,
     initialValues,
