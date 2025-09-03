@@ -26,6 +26,12 @@ export const queryKeys = createQueryKeyStore({
       queryFn: () => api.getTransactions(q),
     }),
   },
+  customers: {
+    get: (id: string) => ({
+      queryKey: [id],
+      queryFn: () => api.getCustomer(id),
+    }),
+  },
 });
 
 // Type helper to infer the return type of a query function from query key factory structure

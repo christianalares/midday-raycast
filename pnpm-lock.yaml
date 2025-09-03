@@ -12,8 +12,8 @@ importers:
         specifier: ^1.3.4
         version: 1.3.4(@tanstack/query-core@5.85.9)(@tanstack/react-query@5.85.9(react@19.0.0))
       '@midday-ai/sdk':
-        specifier: ^0.4.0
-        version: 0.4.0
+        specifier: ^0.4.1
+        version: 0.4.1
       '@raycast/api':
         specifier: ^1.102.6
         version: 1.102.6(@types/node@22.13.10)(@types/react@19.0.10)
@@ -399,8 +399,8 @@ packages:
       '@tanstack/query-core': '>= 4.0.0'
       '@tanstack/react-query': '>= 4.0.0'
 
-  '@midday-ai/sdk@0.4.0':
-    resolution: {integrity: sha512-Qh3fyA71YFHYx/f0hPOGWHgcjYJzLD8ncqssSrz8JtCLVuTMhebJVEBKNwX8mlcA8qqiqbbbNY9heBpqLw4KWw==}
+  '@midday-ai/sdk@0.4.1':
+    resolution: {integrity: sha512-3VoSS7Y0AeIvjcP47tM4thZhsWIJIEeStWdHLKp5naFglGS8is2iZnrgLxTTR4sgXSRU/D95Mh8olr9uQIhJPg==}
     hasBin: true
     peerDependencies:
       '@modelcontextprotocol/sdk': '>=1.5.0 <1.10.0'
@@ -1395,7 +1395,7 @@ snapshots:
       '@tanstack/query-core': 5.85.9
       '@tanstack/react-query': 5.85.9(react@19.0.0)
 
-  '@midday-ai/sdk@0.4.0':
+  '@midday-ai/sdk@0.4.1':
     dependencies:
       zod: 3.25.76
 

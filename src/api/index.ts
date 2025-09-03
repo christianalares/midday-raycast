@@ -6,6 +6,22 @@ type Prettify<T> = {
   [K in keyof T]: T[K];
 } & {};
 
+/**
+ * Wraps a promise with consistent error handling:
+ * - Logs errors for debugging
+ * - Captures errors for monitoring
+ * - Re-throws errors for proper TanStack Query integration
+ */
+const tryCatch = async <T>(promise: Promise<T>): Promise<T> => {
+  try {
+    return await promise;
+  } catch (err) {
+    console.error(err);
+    captureException(err);
+    throw err;
+  }
+};
+
 const getTransactions = async (query?: string) => {
   const midday = getMiddayClient();
 
@@ -20,17 +36,12 @@ const getTransactions = async (query?: string) => {
 const getSpendings = async ({ from, to }: { from: Date; to: Date }) => {
   const midday = getMiddayClient();
 
-  const spendings = await midday.metrics
-    .spending({
+  const spendings = await tryCatch(
+    midday.reports.spending({
       from: from.toISOString().split("T")[0],
       to: to.toISOString().split("T")[0],
-    })
-    .catch((err) => {
-      console.log(err);
-      captureException(err);
-
-      throw err;
-    });
+    }),
+  );
 
   return spendings;
 };
@@ -97,41 +108,71 @@ type SearchResults = Array<
   >
 >;
 
+// TODO: Use the Midday SDK for global search when the validation schema is fixed
 const globalSearch = async (query?: string) => {
   const token = getGlobalToken();
 
-  const res = await fetch(`https://api.midday.ai/search?searchTerm=${query}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  const res = await tryCatch(
+    fetch(`https://api.midday.ai/search?searchTerm=${query}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }),
+  );
 
   const search = (await res.json()) as SearchResults;
 
   return search;
+
+  // const midday = getMiddayClient();
+
+  // const search = await tryCatch(midday.search.search({ searchTerm: query }));
+
+  // return search
 };
 
-export type CreateCustomerArgs = Omit<
-  NonNullable<Parameters<ReturnType<typeof getMiddayClient>["customers"]["create"]>[0]>,
-  "country"
-> & { country: Country["code"] };
+export type CreateCustomerArgs = NonNullable<Parameters<ReturnType<typeof getMiddayClient>["customers"]["create"]>[0]>;
 
 const createCustomer = async (args: CreateCustomerArgs) => {
   const midday = getMiddayClient();
 
-  const createdCustomer = await midday.customers.create(args);
+  const createdCustomer = await tryCatch(midday.customers.create(args));
 
   return createdCustomer;
+};
+
+const getCustomer = async (id: string) => {
+  const midday = getMiddayClient();
+
+  const customer = await tryCatch(midday.customers.get({ id }));
+
+  return customer;
+};
+
+const deleteCustomer = async (id: string) => {
+  const midday = getMiddayClient();
+
+  const deletedCustomer = await tryCatch(midday.customers.delete({ id }));
+
+  return deletedCustomer;
+};
+
+export type UpdateCustomerArgs = NonNullable<Parameters<ReturnType<typeof getMiddayClient>["customers"]["update"]>[0]>;
+
+const updateCustomer = async (args: UpdateCustomerArgs) => {
+  const midday = getMiddayClient();
+
+  const updatedCustomer = await tryCatch(midday.customers.update(args));
+
+  return updatedCustomer;
 };
 
 const getTrackerProjects = async () => {
   const midday = getMiddayClient();
 
-  console.log("FETCHING TRACKER PROJECTS");
+  const trackerProjects = await tryCatch(midday.trackerProjects.list({}));
 
-  const trackerProjects = await midday.trackerProjects.list({});
-
-  const timer = await midday.trackerTimer.getTimerStatus({});
+  const timer = await tryCatch(midday.trackerTimer.getTimerStatus({}));
 
   const trackerProjectsWithTimer = trackerProjects.data.map((project) => {
     return {
@@ -146,9 +187,11 @@ const getTrackerProjects = async () => {
 const startTrackerTimer = async (projectId: string) => {
   const midday = getMiddayClient();
 
-  const startedTimer = await midday.trackerTimer.startTimer({
-    projectId,
-  });
+  const startedTimer = await tryCatch(
+    midday.trackerTimer.startTimer({
+      projectId,
+    }),
+  );
 
   return startedTimer.data;
 };
@@ -156,7 +199,7 @@ const startTrackerTimer = async (projectId: string) => {
 const stopTrackerTimer = async () => {
   const midday = getMiddayClient();
 
-  const stoppedTimer = await midday.trackerTimer.stopTimer({});
+  const stoppedTimer = await tryCatch(midday.trackerTimer.stopTimer({}));
 
   return stoppedTimer.data;
 };
@@ -165,7 +208,10 @@ export const api = {
   getTransactions,
   getSpendings,
   globalSearch,
+  getCustomer,
   createCustomer,
+  updateCustomer,
+  deleteCustomer,
   getTrackerProjects,
   startTrackerTimer,
   stopTrackerTimer,

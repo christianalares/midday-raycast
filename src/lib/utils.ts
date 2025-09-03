@@ -1,4 +1,5 @@
 import { formatDuration } from "date-fns";
+import { countries } from "./countries";
 
 export const formatCurrency = (amount: number, currency: string) => {
   return new Intl.NumberFormat(undefined, {
@@ -33,4 +34,14 @@ export const formatTimerDuration = (totalSeconds: number) => {
   const formattedSeconds = seconds.toString().padStart(2, "0");
 
   return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
+};
+
+export const getCountryByCode = (code: string) => {
+  const foundCountry = Object.values(countries).find((country) => country.code === code);
+
+  if (foundCountry) {
+    return foundCountry;
+  }
+
+  return null;
 };

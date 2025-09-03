@@ -1,12 +1,21 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, List, useNavigation } from "@raycast/api";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import CreateCustomer from "./create-customer";
-import TransactionsComponent from "./transactions";
-import { withMiddayClient } from "./lib/with-midday-client";
-import { useQuery } from "@tanstack/react-query";
 import { queryKeys, type QueryResults } from "./api/queries";
+import CreateCustomer from "./create-customer";
+import { withMiddayClient } from "./lib/with-midday-client";
+import TransactionsComponent from "./transactions";
+import { api } from "./api";
+import { useToggleState } from "./hooks/use-toggle-state";
+import { getCountryByCode } from "./lib/utils";
+import EditCustomer from "./edit-customer";
 
-const Search = () => {
+type Props = {
+  selectedId?: string;
+};
+
+const Search = ({ selectedId }: Props) => {
+  const [showDetails, toggleShowDetails] = useToggleState();
   const [query, setQuery] = useState("");
   const { data, isLoading, error } = useQuery(queryKeys.globalSearch.list(query));
 
@@ -24,6 +33,8 @@ const Search = () => {
       searchBarPlaceholder="Search transactions"
       onSearchTextChange={setQuery}
       throttle={true}
+      selectedItemId={selectedId}
+      isShowingDetail={showDetails}
     >
       {error && (
         <List.EmptyView
@@ -38,7 +49,7 @@ const Search = () => {
       )}
 
       <VaultList results={vaultResults} />
-      <CustomersList results={customerResults} />
+      <CustomersList results={customerResults} showDetails={showDetails} toggleShowDetails={toggleShowDetails} />
       <InvoicesList results={invoicesResults} />
       <TransactionsList results={transactionResults} />
       {/* TODO: Add tracker */}
@@ -54,11 +65,12 @@ const VaultList = ({ results }: { results: ListResultsByType<"vault"> }) => {
   return (
     <List.Section title="Vault">
       {results.map((result) => (
-        <List.Item key={result.id} title={result.data.path_tokens.at(-1) ?? ""} icon={Icon.Document} />
+        <List.Item key={result.id} id={result.id} title={result.data.path_tokens.at(-1) ?? ""} icon={Icon.Document} />
       ))}
 
       <List.Item
         title="View vault"
+        id="view-vault"
         icon={{
           source: Icon.ArrowNe,
           tintColor: Color.SecondaryText,
@@ -73,12 +85,38 @@ const VaultList = ({ results }: { results: ListResultsByType<"vault"> }) => {
   );
 };
 
-const CustomersList = ({ results }: { results: ListResultsByType<"customer"> }) => {
+const CustomersList = ({
+  results,
+  showDetails,
+  toggleShowDetails,
+}: {
+  results: ListResultsByType<"customer">;
+  showDetails: boolean;
+  toggleShowDetails: () => void;
+}) => {
+  const navigation = useNavigation();
+  const queryClient = useQueryClient();
+
+  const deleteCustomerMutation = useMutation({
+    mutationFn: api.deleteCustomer,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.globalSearch._def });
+    },
+    meta: {
+      toastTitle: {
+        loading: "Deleting customer...",
+        success: "✅ Customer deleted",
+        error: "❌ Failed to delete customer",
+      },
+    },
+  });
+
   return (
     <List.Section title="Customers">
       {results.map((result) => (
         <List.Item
           key={result.id}
+          id={result.id}
           title={result.data.name}
           icon={Icon.Person}
           accessories={[
@@ -86,6 +124,48 @@ const CustomersList = ({ results }: { results: ListResultsByType<"customer"> }) 
               text: result.data.email,
             },
           ]}
+          detail={<CustomerDetail shouldFetch={showDetails} result={result} />}
+          actions={
+            <ActionPanel>
+              <Action
+                title={showDetails ? "Hide Details" : "Show Details"}
+                onAction={toggleShowDetails}
+                icon={showDetails ? Icon.EyeDisabled : Icon.Eye}
+              />
+
+              <ActionPanel.Section>
+                <Action
+                  title="Edit customer"
+                  icon={Icon.Pencil}
+                  onAction={() => navigation.push(<EditCustomer customerId={result.id} />)}
+                  shortcut={{ modifiers: ["cmd"], key: "e" }}
+                />
+
+                <Action
+                  title="Delete customer"
+                  icon={Icon.Trash}
+                  style={Action.Style.Destructive}
+                  shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                  onAction={async () => {
+                    const isConfirmed = await confirmAlert({
+                      title: "Are you sure you want to delete this customer?",
+                      message: "This action cannot be undone.",
+                      primaryAction: {
+                        title: "Delete",
+                        style: Alert.ActionStyle.Destructive,
+                      },
+                    });
+
+                    if (!isConfirmed) {
+                      return;
+                    }
+
+                    deleteCustomerMutation.mutate(result.id);
+                  }}
+                />
+              </ActionPanel.Section>
+            </ActionPanel>
+          }
         />
       ))}
 
@@ -103,6 +183,7 @@ const CustomersList = ({ results }: { results: ListResultsByType<"customer"> }) 
       />
       <List.Item
         title="View customers"
+        id="view-customers"
         icon={{
           source: Icon.ArrowNe,
           tintColor: Color.SecondaryText,
@@ -121,7 +202,7 @@ const InvoicesList = ({ results }: { results: ListResultsByType<"invoice"> }) =>
   return (
     <List.Section title="Invoices">
       {results.map((result) => (
-        <List.Item key={result.id} title={result.data.customer_name} icon={Icon.Document} />
+        <List.Item key={result.id} id={result.id} title={result.data.customer_name} icon={Icon.Document} />
       ))}
 
       {/* TODO: Add create invoice */}
@@ -129,6 +210,7 @@ const InvoicesList = ({ results }: { results: ListResultsByType<"invoice"> }) =>
 
       <List.Item
         title="View invoices"
+        id="view-invoices"
         icon={{
           source: Icon.ArrowNe,
           tintColor: Color.SecondaryText,
@@ -147,13 +229,14 @@ const TransactionsList = ({ results }: { results: ListResultsByType<"transaction
   return (
     <List.Section title="Transactions">
       {results.map((result) => (
-        <List.Item key={result.id} title={result.data.name} icon={Icon.List} />
+        <List.Item key={result.id} id={result.id} title={result.data.name} icon={Icon.List} />
       ))}
 
       {/*  */}
       {/* <List.Item title="Create transaction" icon={Icon.ArrowNe} /> */}
       <List.Item
         title="View transactions"
+        id="view-transactions"
         icon={{
           source: Icon.ArrowRight,
           tintColor: Color.SecondaryText,
@@ -172,11 +255,12 @@ const InboxList = ({ results }: { results: ListResultsByType<"inbox"> }) => {
   return (
     <List.Section title="Inbox">
       {results.map((result) => (
-        <List.Item key={result.id} title={result.data.file_name} icon={Icon.Document} />
+        <List.Item key={result.id} id={result.id} title={result.data.file_name} icon={Icon.Document} />
       ))}
 
       <List.Item
         title="View inbox"
+        id="view-inbox"
         icon={Icon.ArrowNe}
         actions={
           <ActionPanel>
@@ -185,6 +269,72 @@ const InboxList = ({ results }: { results: ListResultsByType<"inbox"> }) => {
         }
       />
     </List.Section>
+  );
+};
+
+const CustomerDetail = ({
+  result,
+  shouldFetch,
+}: {
+  result: ListResultsByType<"customer">[number];
+  shouldFetch: boolean;
+}) => {
+  const { data: customer, isLoading } = useQuery({
+    ...queryKeys.customers.get(result.id),
+    enabled: shouldFetch,
+  });
+
+  if (!customer) {
+    return null;
+  }
+
+  const customerCountry = customer.country ? getCountryByCode(customer.country) : null;
+
+  return (
+    <List.Item.Detail
+      isLoading={isLoading}
+      markdown={isLoading ? "Loading..." : null}
+      metadata={
+        isLoading ? null : (
+          <List.Item.Detail.Metadata>
+            <List.Item.Detail.Metadata.Label title="Name" text={customer.name} />
+            <List.Item.Detail.Metadata.Label title="Email" text={customer.email} />
+            {customer.billingEmail && (
+              <List.Item.Detail.Metadata.Label title="Billing Email" text={customer.billingEmail} />
+            )}
+
+            {customer.phone && <List.Item.Detail.Metadata.Label title="Phone" text={customer.phone} />}
+            {customer.website && <List.Item.Detail.Metadata.Label title="Website" text={customer.website} />}
+            {customer.contact && <List.Item.Detail.Metadata.Label title="Contact" text={customer.contact} />}
+
+            <List.Item.Detail.Metadata.Separator />
+
+            {customer.addressLine1 && (
+              <List.Item.Detail.Metadata.Label title="Address Line 1" text={customer.addressLine1} />
+            )}
+            {customer.addressLine2 && (
+              <List.Item.Detail.Metadata.Label title="Address Line 2" text={customer.addressLine2} />
+            )}
+            {customerCountry && (
+              <List.Item.Detail.Metadata.Label
+                title="Country"
+                text={`${customerCountry.emoji} ${customerCountry.name}`}
+              />
+            )}
+            {customer.city && <List.Item.Detail.Metadata.Label title="City" text={customer.city} />}
+            {customer.state && <List.Item.Detail.Metadata.Label title="State / Province" text={customer.state} />}
+            {customer.zip && <List.Item.Detail.Metadata.Label title="ZIP Code / Postal Code" text={customer.zip} />}
+
+            <List.Item.Detail.Metadata.Separator />
+
+            {customer.vatNumber && (
+              <List.Item.Detail.Metadata.Label title="Tax ID / VAT Number" text={customer.vatNumber} />
+            )}
+            {customer.note && <List.Item.Detail.Metadata.Label title="Note" text={customer.note} />}
+          </List.Item.Detail.Metadata>
+        )
+      }
+    />
   );
 };
 
