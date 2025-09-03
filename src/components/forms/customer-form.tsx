@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, Form } from "@raycast/api";
+import { Action, ActionPanel, Form } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 import { type CreateCustomerArgs } from "../../api";
 import { countries } from "../../lib/countries";

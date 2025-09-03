@@ -1,5 +1,4 @@
 import { captureException } from "@raycast/api";
-import { Country } from "../lib/countries";
 import { getGlobalToken, getMiddayClient } from "./oauth";
 
 type Prettify<T> = {

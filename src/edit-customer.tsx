@@ -3,6 +3,7 @@ import { api } from "./api";
 import { queryKeys } from "./api/queries";
 import { CustomerForm } from "./components/forms/customer-form";
 import { withMiddayClient } from "./lib/with-midday-client";
+import { Detail } from "@raycast/api";
 
 type Props = {
   customerId: string;
@@ -28,6 +29,10 @@ const EditCustomer = ({ customerId }: Props) => {
     },
   });
 
+  if (error) {
+    return <Detail markdown={error.message} />;
+  }
+
   if (!customer) {
     return null;
   }
@@ -41,7 +46,7 @@ const EditCustomer = ({ customerId }: Props) => {
           requestBody: values,
         })
       }
-      isLoading={editCustomerMutation.isPending}
+      isLoading={isLoading || editCustomerMutation.isPending}
       initialValues={customer}
     />
   );
