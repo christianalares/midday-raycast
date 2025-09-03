@@ -1,25 +1,25 @@
-import { Action, ActionPanel, Form } from "@raycast/api";
-import { FormValidation, useForm } from "@raycast/utils";
-import { type CreateCustomerArgs } from "../../api";
-import { countries } from "../../lib/countries";
+import { Action, ActionPanel, Form } from '@raycast/api'
+import { FormValidation, useForm } from '@raycast/utils'
+import { type CreateCustomerArgs } from '../../api'
+import { countries } from '../../lib/countries'
 
-type Customer = CreateCustomerArgs;
+type Customer = CreateCustomerArgs
 
 const cleanFormProps = (props: any) => ({
   ...props,
   value: props.value === null ? undefined : props.value,
   defaultValue: props.defaultValue === null ? undefined : props.defaultValue,
-});
+})
 
 type Props = {
-  onSubmit: (values: Customer) => void;
-  initialValues: Parameters<typeof useForm<Customer>>[0]["initialValues"];
-  ctaText: string;
-  isLoading: boolean;
-};
+  onSubmit: (values: Customer) => void
+  initialValues: Parameters<typeof useForm<Customer>>[0]['initialValues']
+  ctaText: string
+  isLoading: boolean
+}
 
 export const CustomerForm = ({ onSubmit, initialValues, ctaText, isLoading }: Props) => {
-  console.log(initialValues);
+  console.log(initialValues)
 
   const form = useForm<CreateCustomerArgs>({
     onSubmit: onSubmit,
@@ -31,7 +31,7 @@ export const CustomerForm = ({ onSubmit, initialValues, ctaText, isLoading }: Pr
       addressLine1: FormValidation.Required,
       country: FormValidation.Required,
     },
-  });
+  })
 
   return (
     <Form
@@ -83,5 +83,5 @@ export const CustomerForm = ({ onSubmit, initialValues, ctaText, isLoading }: Pr
       />
       <Form.TextArea title="Notes" placeholder="Additional information..." {...cleanFormProps(form.itemProps.note)} />
     </Form>
-  );
-};
+  )
+}

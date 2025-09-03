@@ -1,9 +1,9 @@
-import { captureException } from "@raycast/api";
-import { getGlobalToken, getMiddayClient } from "./oauth";
+import { captureException } from '@raycast/api'
+import { getGlobalToken, getMiddayClient } from './oauth'
 
 type Prettify<T> = {
-  [K in keyof T]: T[K];
-} & {};
+  [K in keyof T]: T[K]
+} & {}
 
 /**
  * Wraps a promise with consistent error handling:
@@ -13,103 +13,103 @@ type Prettify<T> = {
  */
 const tryCatch = async <T>(promise: Promise<T>): Promise<T> => {
   try {
-    return await promise;
+    return await promise
   } catch (err) {
-    console.error(err);
-    captureException(err);
-    throw err;
+    console.error(err)
+    captureException(err)
+    throw err
   }
-};
+}
 
 const getTransactions = async (query?: string) => {
-  const midday = getMiddayClient();
+  const midday = getMiddayClient()
 
   const transactions = await midday.transactions.list({
     pageSize: 100,
     q: query,
-  });
+  })
 
-  return transactions.data;
-};
+  return transactions.data
+}
 
 const getSpendings = async ({ from, to }: { from: Date; to: Date }) => {
-  const midday = getMiddayClient();
+  const midday = getMiddayClient()
 
   const spendings = await tryCatch(
     midday.reports.spending({
-      from: from.toISOString().split("T")[0],
-      to: to.toISOString().split("T")[0],
+      from: from.toISOString().split('T')[0],
+      to: to.toISOString().split('T')[0],
     }),
-  );
+  )
 
-  return spendings;
-};
+  return spendings
+}
 
-type SearchResultItem = Awaited<ReturnType<ReturnType<typeof getMiddayClient>["search"]["search"]>>[number];
+type SearchResultItem = Awaited<ReturnType<ReturnType<typeof getMiddayClient>['search']['search']>>[number]
 type SearchResults = Array<
   Prettify<
-    Omit<SearchResultItem, "data"> &
+    Omit<SearchResultItem, 'data'> &
       (
         | {
-            type: "vault";
+            type: 'vault'
             data: {
-              tag: string | null;
-              name: string;
-              title: string;
-              summary: string;
+              tag: string | null
+              name: string
+              title: string
+              summary: string
               metadata: {
-                eTag: string;
-                size: number;
-                mimeType: string;
-              };
-              object_id: string;
-              path_tokens: string[];
-              doc_language: string;
-            };
+                eTag: string
+                size: number
+                mimeType: string
+              }
+              object_id: string
+              path_tokens: string[]
+              doc_language: string
+            }
           }
         | {
-            type: "transaction";
+            type: 'transaction'
             data: {
-              date: string | null;
-              name: string;
-              amount: number;
-              method: string;
-              category: string | null;
-              currency: string;
-            };
+              date: string | null
+              name: string
+              amount: number
+              method: string
+              category: string | null
+              currency: string
+            }
           }
         | {
-            type: "inbox";
+            type: 'inbox'
             data: {
-              date: string | null;
-              file_name: string;
-            };
+              date: string | null
+              file_name: string
+            }
           }
         | {
-            type: "customer";
+            type: 'customer'
             data: {
-              name: string;
-              email: string;
-            };
+              name: string
+              email: string
+            }
           }
         | {
-            type: "invoice";
+            type: 'invoice'
             data: {
-              amount: number;
-              status: string;
-              currency: string;
-              due_date: string;
-              customer_name: string;
-              invoice_number: string;
-            };
+              amount: number
+              status: string
+              currency: string
+              due_date: string
+              customer_name: string
+              invoice_number: string
+            }
           }
       )
   >
->;
+>
 
 // TODO: Use the Midday SDK for global search when the validation schema is fixed
 const globalSearch = async (query?: string) => {
-  const token = getGlobalToken();
+  const token = getGlobalToken()
 
   const res = await tryCatch(
     fetch(`https://api.midday.ai/search?searchTerm=${query}`, {
@@ -117,91 +117,91 @@ const globalSearch = async (query?: string) => {
         Authorization: `Bearer ${token}`,
       },
     }),
-  );
+  )
 
-  const search = (await res.json()) as SearchResults;
+  const search = (await res.json()) as SearchResults
 
-  return search;
+  return search
 
   // const midday = getMiddayClient();
 
   // const search = await tryCatch(midday.search.search({ searchTerm: query }));
 
   // return search
-};
+}
 
-export type CreateCustomerArgs = NonNullable<Parameters<ReturnType<typeof getMiddayClient>["customers"]["create"]>[0]>;
+export type CreateCustomerArgs = NonNullable<Parameters<ReturnType<typeof getMiddayClient>['customers']['create']>[0]>
 
 const createCustomer = async (args: CreateCustomerArgs) => {
-  const midday = getMiddayClient();
+  const midday = getMiddayClient()
 
-  const createdCustomer = await tryCatch(midday.customers.create(args));
+  const createdCustomer = await tryCatch(midday.customers.create(args))
 
-  return createdCustomer;
-};
+  return createdCustomer
+}
 
 const getCustomer = async (id: string) => {
-  const midday = getMiddayClient();
+  const midday = getMiddayClient()
 
-  const customer = await tryCatch(midday.customers.get({ id }));
+  const customer = await tryCatch(midday.customers.get({ id }))
 
-  return customer;
-};
+  return customer
+}
 
 const deleteCustomer = async (id: string) => {
-  const midday = getMiddayClient();
+  const midday = getMiddayClient()
 
-  const deletedCustomer = await tryCatch(midday.customers.delete({ id }));
+  const deletedCustomer = await tryCatch(midday.customers.delete({ id }))
 
-  return deletedCustomer;
-};
+  return deletedCustomer
+}
 
-export type UpdateCustomerArgs = NonNullable<Parameters<ReturnType<typeof getMiddayClient>["customers"]["update"]>[0]>;
+export type UpdateCustomerArgs = NonNullable<Parameters<ReturnType<typeof getMiddayClient>['customers']['update']>[0]>
 
 const updateCustomer = async (args: UpdateCustomerArgs) => {
-  const midday = getMiddayClient();
+  const midday = getMiddayClient()
 
-  const updatedCustomer = await tryCatch(midday.customers.update(args));
+  const updatedCustomer = await tryCatch(midday.customers.update(args))
 
-  return updatedCustomer;
-};
+  return updatedCustomer
+}
 
 const getTrackerProjects = async () => {
-  const midday = getMiddayClient();
+  const midday = getMiddayClient()
 
-  const trackerProjects = await tryCatch(midday.trackerProjects.list({}));
+  const trackerProjects = await tryCatch(midday.trackerProjects.list({}))
 
-  const timer = await tryCatch(midday.trackerTimer.getTimerStatus({}));
+  const timer = await tryCatch(midday.trackerTimer.getTimerStatus({}))
 
   const trackerProjectsWithTimer = trackerProjects.data.map((project) => {
     return {
       ...project,
       timer: timer.data.currentEntry?.projectId === project.id ? timer.data : null,
-    };
-  });
+    }
+  })
 
-  return trackerProjectsWithTimer;
-};
+  return trackerProjectsWithTimer
+}
 
 const startTrackerTimer = async (projectId: string) => {
-  const midday = getMiddayClient();
+  const midday = getMiddayClient()
 
   const startedTimer = await tryCatch(
     midday.trackerTimer.startTimer({
       projectId,
     }),
-  );
+  )
 
-  return startedTimer.data;
-};
+  return startedTimer.data
+}
 
 const stopTrackerTimer = async () => {
-  const midday = getMiddayClient();
+  const midday = getMiddayClient()
 
-  const stoppedTimer = await tryCatch(midday.trackerTimer.stopTimer({}));
+  const stoppedTimer = await tryCatch(midday.trackerTimer.stopTimer({}))
 
-  return stoppedTimer.data;
-};
+  return stoppedTimer.data
+}
 
 export const api = {
   getTransactions,
@@ -214,4 +214,4 @@ export const api = {
   getTrackerProjects,
   startTrackerTimer,
   stopTrackerTimer,
-};
+}

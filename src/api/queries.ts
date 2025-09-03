@@ -1,5 +1,5 @@
-import { createQueryKeyStore } from "@lukemorales/query-key-factory";
-import { api } from ".";
+import { createQueryKeyStore } from '@lukemorales/query-key-factory'
+import { api } from '.'
 
 export const queryKeys = createQueryKeyStore({
   globalSearch: {
@@ -16,7 +16,7 @@ export const queryKeys = createQueryKeyStore({
   },
   trackerProjects: {
     list: () => ({
-      queryKey: ["tracker-projects"],
+      queryKey: ['tracker-projects'],
       queryFn: () => api.getTrackerProjects(),
     }),
   },
@@ -32,7 +32,7 @@ export const queryKeys = createQueryKeyStore({
       queryFn: () => api.getCustomer(id),
     }),
   },
-});
+})
 
 // Type helper to infer the return type of a query function from query key factory structure
 type InferQueryResult<T> = T extends (...args: any[]) => infer TReturn
@@ -45,15 +45,15 @@ type InferQueryResult<T> = T extends (...args: any[]) => infer TReturn
     ? TFn extends (...args: any[]) => any
       ? Awaited<ReturnType<TFn>>
       : never
-    : never;
+    : never
 
 // Type helper to create QueryResults type from the entire query key store
 type InferQueryKeyStoreResults<T> = {
   [K in keyof T]: T[K] extends Record<string, any>
     ? {
-        [P in keyof T[K] as P extends "_def" ? never : P]: InferQueryResult<T[K][P]>;
+        [P in keyof T[K] as P extends '_def' ? never : P]: InferQueryResult<T[K][P]>
       }
-    : InferQueryResult<T[K]>;
-};
+    : InferQueryResult<T[K]>
+}
 
-export type QueryResults = InferQueryKeyStoreResults<typeof queryKeys>;
+export type QueryResults = InferQueryKeyStoreResults<typeof queryKeys>

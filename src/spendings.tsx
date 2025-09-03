@@ -1,5 +1,5 @@
-import { Color, Icon, List } from "@raycast/api";
-import { useQuery } from "@tanstack/react-query";
+import { Color, Icon, List } from '@raycast/api'
+import { useQuery } from '@tanstack/react-query'
 import {
   endOfDay,
   endOfMonth,
@@ -10,56 +10,56 @@ import {
   subDays,
   subMonths,
   subYears,
-} from "date-fns";
-import { useState } from "react";
-import { queryKeys } from "./api/queries";
-import { formatCurrency } from "./lib/utils";
-import { withMiddayClient } from "./lib/with-midday-client";
+} from 'date-fns'
+import { useState } from 'react'
+import { queryKeys } from './api/queries'
+import { formatCurrency } from './lib/utils'
+import { withMiddayClient } from './lib/with-midday-client'
 
 type DateFilter = {
-  value: string;
-  label: string;
-  from: Date;
-  to: Date;
-};
+  value: string
+  label: string
+  from: Date
+  to: Date
+}
 
 const DATE_FILTERS: DateFilter[] = [
   {
-    value: "last30Days",
-    label: "Last 30 days",
+    value: 'last30Days',
+    label: 'Last 30 days',
     from: startOfDay(subDays(new Date(), 30)),
     to: endOfDay(new Date()),
   },
   {
-    value: "thisMonth",
-    label: "This month",
+    value: 'thisMonth',
+    label: 'This month',
     from: startOfMonth(new Date()),
     to: endOfDay(new Date()),
   },
   {
-    value: "lastMonth",
-    label: "Last month",
+    value: 'lastMonth',
+    label: 'Last month',
     from: startOfMonth(subMonths(new Date(), 1)),
     to: endOfMonth(subMonths(new Date(), 1)),
   },
   {
-    value: "thisYear",
-    label: "This year",
+    value: 'thisYear',
+    label: 'This year',
     from: startOfYear(new Date()),
     to: endOfYear(new Date()),
   },
   {
-    value: "lastYear",
-    label: "Last year",
+    value: 'lastYear',
+    label: 'Last year',
     from: startOfYear(subYears(new Date(), 1)),
     to: endOfYear(subYears(new Date(), 1)),
   },
-];
+]
 
 function TransactionsComponent() {
-  const [dateFilter, setDateFilter] = useState(DATE_FILTERS[0]);
-  const { data, isLoading, error } = useQuery(queryKeys.spendings.list({ from: dateFilter.from, to: dateFilter.to }));
-  const spendings = data ?? [];
+  const [dateFilter, setDateFilter] = useState(DATE_FILTERS[0])
+  const { data, isLoading, error } = useQuery(queryKeys.spendings.list({ from: dateFilter.from, to: dateFilter.to }))
+  const spendings = data ?? []
 
   return (
     <List
@@ -70,13 +70,13 @@ function TransactionsComponent() {
         <List.Dropdown
           tooltip="Filter by status"
           onChange={(value) => {
-            const foundFilter = DATE_FILTERS.find((filter) => filter.value === value);
+            const foundFilter = DATE_FILTERS.find((filter) => filter.value === value)
 
             if (!foundFilter) {
-              return;
+              return
             }
 
-            setDateFilter(foundFilter);
+            setDateFilter(foundFilter)
           }}
         >
           <List.Dropdown.Section>
@@ -119,10 +119,10 @@ function TransactionsComponent() {
               },
             ]}
           />
-        );
+        )
       })}
     </List>
-  );
+  )
 }
 
-export default withMiddayClient(TransactionsComponent);
+export default withMiddayClient(TransactionsComponent)

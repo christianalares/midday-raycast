@@ -1,31 +1,31 @@
-import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, List, useNavigation } from "@raycast/api";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
-import { queryKeys, type QueryResults } from "./api/queries";
-import CreateCustomer from "./create-customer";
-import { withMiddayClient } from "./lib/with-midday-client";
-import TransactionsComponent from "./transactions";
-import { api } from "./api";
-import { useToggleState } from "./hooks/use-toggle-state";
-import { getCountryByCode } from "./lib/utils";
-import EditCustomer from "./edit-customer";
+import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, List, useNavigation } from '@raycast/api'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useState } from 'react'
+import { queryKeys, type QueryResults } from './api/queries'
+import CreateCustomer from './create-customer'
+import { withMiddayClient } from './lib/with-midday-client'
+import TransactionsComponent from './transactions'
+import { api } from './api'
+import { useToggleState } from './hooks/use-toggle-state'
+import { getCountryByCode } from './lib/utils'
+import EditCustomer from './edit-customer'
 
 type Props = {
-  selectedId?: string;
-};
+  selectedId?: string
+}
 
 const Search = ({ selectedId }: Props) => {
-  const [showDetails, toggleShowDetails] = useToggleState();
-  const [query, setQuery] = useState("");
-  const { data, isLoading, error } = useQuery(queryKeys.globalSearch.list(query));
+  const [showDetails, toggleShowDetails] = useToggleState()
+  const [query, setQuery] = useState('')
+  const { data, isLoading, error } = useQuery(queryKeys.globalSearch.list(query))
 
-  const search = data ?? [];
+  const search = data ?? []
 
-  const vaultResults = search.filter((result) => result.type === "vault");
-  const customerResults = search.filter((result) => result.type === "customer");
-  const invoicesResults = search.filter((result) => result.type === "invoice");
-  const transactionResults = search.filter((result) => result.type === "transaction");
-  const inboxResults = search.filter((result) => result.type === "inbox");
+  const vaultResults = search.filter((result) => result.type === 'vault')
+  const customerResults = search.filter((result) => result.type === 'customer')
+  const invoicesResults = search.filter((result) => result.type === 'invoice')
+  const transactionResults = search.filter((result) => result.type === 'transaction')
+  const inboxResults = search.filter((result) => result.type === 'inbox')
 
   return (
     <List
@@ -55,17 +55,17 @@ const Search = ({ selectedId }: Props) => {
       {/* TODO: Add tracker */}
       <InboxList results={inboxResults} />
     </List>
-  );
-};
+  )
+}
 
-type ResultItem = QueryResults["globalSearch"]["list"][number];
-type ListResultsByType<T extends ResultItem["type"]> = Array<Extract<ResultItem, { type: T }>>;
+type ResultItem = QueryResults['globalSearch']['list'][number]
+type ListResultsByType<T extends ResultItem['type']> = Array<Extract<ResultItem, { type: T }>>
 
-const VaultList = ({ results }: { results: ListResultsByType<"vault"> }) => {
+const VaultList = ({ results }: { results: ListResultsByType<'vault'> }) => {
   return (
     <List.Section title="Vault">
       {results.map((result) => (
-        <List.Item key={result.id} id={result.id} title={result.data.path_tokens.at(-1) ?? ""} icon={Icon.Document} />
+        <List.Item key={result.id} id={result.id} title={result.data.path_tokens.at(-1) ?? ''} icon={Icon.Document} />
       ))}
 
       <List.Item
@@ -82,34 +82,34 @@ const VaultList = ({ results }: { results: ListResultsByType<"vault"> }) => {
         }
       />
     </List.Section>
-  );
-};
+  )
+}
 
 const CustomersList = ({
   results,
   showDetails,
   toggleShowDetails,
 }: {
-  results: ListResultsByType<"customer">;
-  showDetails: boolean;
-  toggleShowDetails: () => void;
+  results: ListResultsByType<'customer'>
+  showDetails: boolean
+  toggleShowDetails: () => void
 }) => {
-  const navigation = useNavigation();
-  const queryClient = useQueryClient();
+  const navigation = useNavigation()
+  const queryClient = useQueryClient()
 
   const deleteCustomerMutation = useMutation({
     mutationFn: api.deleteCustomer,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.globalSearch._def });
+      queryClient.invalidateQueries({ queryKey: queryKeys.globalSearch._def })
     },
     meta: {
       toastTitle: {
-        loading: "Deleting customer...",
-        success: "✅ Customer deleted",
-        error: "❌ Failed to delete customer",
+        loading: 'Deleting customer...',
+        success: '✅ Customer deleted',
+        error: '❌ Failed to delete customer',
       },
     },
-  });
+  })
 
   return (
     <List.Section title="Customers">
@@ -128,7 +128,7 @@ const CustomersList = ({
           actions={
             <ActionPanel>
               <Action
-                title={showDetails ? "Hide Details" : "Show Details"}
+                title={showDetails ? 'Hide Details' : 'Show Details'}
                 onAction={toggleShowDetails}
                 icon={showDetails ? Icon.EyeDisabled : Icon.Eye}
               />
@@ -138,29 +138,29 @@ const CustomersList = ({
                   title="Edit customer"
                   icon={Icon.Pencil}
                   onAction={() => navigation.push(<EditCustomer customerId={result.id} />)}
-                  shortcut={{ modifiers: ["cmd"], key: "e" }}
+                  shortcut={{ modifiers: ['cmd'], key: 'e' }}
                 />
 
                 <Action
                   title="Delete customer"
                   icon={Icon.Trash}
                   style={Action.Style.Destructive}
-                  shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                  shortcut={{ modifiers: ['ctrl'], key: 'x' }}
                   onAction={async () => {
                     const isConfirmed = await confirmAlert({
-                      title: "Are you sure you want to delete this customer?",
-                      message: "This action cannot be undone.",
+                      title: 'Are you sure you want to delete this customer?',
+                      message: 'This action cannot be undone.',
                       primaryAction: {
-                        title: "Delete",
+                        title: 'Delete',
                         style: Alert.ActionStyle.Destructive,
                       },
-                    });
+                    })
 
                     if (!isConfirmed) {
-                      return;
+                      return
                     }
 
-                    deleteCustomerMutation.mutate(result.id);
+                    deleteCustomerMutation.mutate(result.id)
                   }}
                 />
               </ActionPanel.Section>
@@ -195,10 +195,10 @@ const CustomersList = ({
         }
       />
     </List.Section>
-  );
-};
+  )
+}
 
-const InvoicesList = ({ results }: { results: ListResultsByType<"invoice"> }) => {
+const InvoicesList = ({ results }: { results: ListResultsByType<'invoice'> }) => {
   return (
     <List.Section title="Invoices">
       {results.map((result) => (
@@ -222,10 +222,10 @@ const InvoicesList = ({ results }: { results: ListResultsByType<"invoice"> }) =>
         }
       />
     </List.Section>
-  );
-};
+  )
+}
 
-const TransactionsList = ({ results }: { results: ListResultsByType<"transaction"> }) => {
+const TransactionsList = ({ results }: { results: ListResultsByType<'transaction'> }) => {
   return (
     <List.Section title="Transactions">
       {results.map((result) => (
@@ -248,10 +248,10 @@ const TransactionsList = ({ results }: { results: ListResultsByType<"transaction
         }
       />
     </List.Section>
-  );
-};
+  )
+}
 
-const InboxList = ({ results }: { results: ListResultsByType<"inbox"> }) => {
+const InboxList = ({ results }: { results: ListResultsByType<'inbox'> }) => {
   return (
     <List.Section title="Inbox">
       {results.map((result) => (
@@ -269,31 +269,31 @@ const InboxList = ({ results }: { results: ListResultsByType<"inbox"> }) => {
         }
       />
     </List.Section>
-  );
-};
+  )
+}
 
 const CustomerDetail = ({
   result,
   shouldFetch,
 }: {
-  result: ListResultsByType<"customer">[number];
-  shouldFetch: boolean;
+  result: ListResultsByType<'customer'>[number]
+  shouldFetch: boolean
 }) => {
   const { data: customer, isLoading } = useQuery({
     ...queryKeys.customers.get(result.id),
     enabled: shouldFetch,
-  });
+  })
 
   if (!customer) {
-    return null;
+    return null
   }
 
-  const customerCountry = customer.country ? getCountryByCode(customer.country) : null;
+  const customerCountry = customer.country ? getCountryByCode(customer.country) : null
 
   return (
     <List.Item.Detail
       isLoading={isLoading}
-      markdown={isLoading ? "Loading..." : null}
+      markdown={isLoading ? 'Loading...' : null}
       metadata={
         isLoading ? null : (
           <List.Item.Detail.Metadata>
@@ -335,7 +335,7 @@ const CustomerDetail = ({
         )
       }
     />
-  );
-};
+  )
+}
 
-export default withMiddayClient(Search);
+export default withMiddayClient(Search)

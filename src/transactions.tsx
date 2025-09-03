@@ -1,18 +1,18 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from '@raycast/api'
 
-import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
-import { queryKeys } from "./api/queries";
-import { formatCurrency } from "./lib/utils";
-import { withMiddayClient } from "./lib/with-midday-client";
+import { useQuery } from '@tanstack/react-query'
+import { useState } from 'react'
+import { queryKeys } from './api/queries'
+import { formatCurrency } from './lib/utils'
+import { withMiddayClient } from './lib/with-midday-client'
 
 function TransactionsComponent() {
-  const [query, setQuery] = useState<string | undefined>(undefined);
-  const { data, isLoading, error } = useQuery(queryKeys.transactions.list(query));
+  const [query, setQuery] = useState<string | undefined>(undefined)
+  const { data, isLoading, error } = useQuery(queryKeys.transactions.list(query))
 
-  const transactions = data ?? [];
+  const transactions = data ?? []
 
-  const [showDetails, setShowDetails] = useState(false);
+  const [showDetails, setShowDetails] = useState(false)
 
   return (
     <List
@@ -104,12 +104,12 @@ function TransactionsComponent() {
                       <List.Item.Detail.Metadata.TagList title="Attachments">
                         {(tx.attachments ?? []).map((attachment) => {
                           if (!attachment.filename) {
-                            return null;
+                            return null
                           }
 
                           return (
                             <List.Item.Detail.Metadata.TagList.Item key={attachment.id} text={attachment.filename} />
-                          );
+                          )
                         })}
                       </List.Item.Detail.Metadata.TagList>
                     )}
@@ -122,7 +122,7 @@ function TransactionsComponent() {
             actions={
               <ActionPanel>
                 <Action
-                  title={showDetails ? "Hide Details" : "Show Details"}
+                  title={showDetails ? 'Hide Details' : 'Show Details'}
                   onAction={() => setShowDetails(!showDetails)}
                   icon={showDetails ? Icon.EyeDisabled : Icon.Eye}
                 />
@@ -141,10 +141,10 @@ function TransactionsComponent() {
               </ActionPanel>
             }
           />
-        );
+        )
       })}
     </List>
-  );
+  )
 }
 
-export default withMiddayClient(TransactionsComponent);
+export default withMiddayClient(TransactionsComponent)
