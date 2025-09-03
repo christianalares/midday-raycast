@@ -1,29 +1,29 @@
 import { createQueryKeyStore } from "@lukemorales/query-key-factory";
-import { getSpendings, getTrackerProjects, getTransactions, globalSearch } from ".";
+import { api } from ".";
 
 export const queryKeys = createQueryKeyStore({
   globalSearch: {
     list: (q?: string) => ({
       queryKey: [q],
-      queryFn: () => globalSearch(q),
+      queryFn: () => api.globalSearch(q),
     }),
   },
   spendings: {
     list: ({ from, to }: { from: Date; to: Date }) => ({
       queryKey: [{ from, to }],
-      queryFn: () => getSpendings({ from, to }),
+      queryFn: () => api.getSpendings({ from, to }),
     }),
   },
   trackerProjects: {
     list: () => ({
       queryKey: ["tracker-projects"],
-      queryFn: () => getTrackerProjects(),
+      queryFn: () => api.getTrackerProjects(),
     }),
   },
   transactions: {
     list: (q?: string) => ({
       queryKey: [q],
-      queryFn: () => getTransactions(q),
+      queryFn: () => api.getTransactions(q),
     }),
   },
 });

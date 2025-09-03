@@ -1,7 +1,7 @@
 import { Action, ActionPanel, captureException, Form, showToast, Toast } from "@raycast/api";
 import { withMiddayClient } from "./lib/with-midday-client";
 import { FormValidation, useForm } from "@raycast/utils";
-import { createCustomer, CreateCustomerArgs } from "./api";
+import { api, CreateCustomerArgs } from "./api";
 import { countries } from "./lib/countries";
 
 // Helper function to clean form props by converting null to undefined
@@ -19,7 +19,8 @@ const CreateCustomer = () => {
         title: "Creating customer...",
       });
 
-      createCustomer(values)
+      api
+        .createCustomer(values)
         .then(async (createdCustomer) => {
           await showToast({
             style: Toast.Style.Success,

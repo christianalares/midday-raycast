@@ -2,7 +2,7 @@ import { Action, ActionPanel, captureException, Color, Icon, Image, List, showTo
 import { showFailureToast } from "@raycast/utils";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { startTrackerTimer, stopTrackerTimer } from "./api";
+import { api } from "./api";
 import { type QueryResults, queryKeys } from "./api/queries";
 import { formatCurrency, formatDurationFromSeconds, formatTimerDuration } from "./lib/utils";
 import { withMiddayClient } from "./lib/with-midday-client";
@@ -55,7 +55,8 @@ const ProjectListItem = ({ project, showDetails, setShowDetails }: ProjectListIt
   const handleStartTimer = async () => {
     await showToast({ style: Toast.Style.Animated, title: "Starting timer..." });
 
-    startTrackerTimer(project.id)
+    api
+      .startTrackerTimer(project.id)
       .then(async (startedTimer) => {
         await showToast({
           style: Toast.Style.Success,
@@ -76,7 +77,8 @@ const ProjectListItem = ({ project, showDetails, setShowDetails }: ProjectListIt
   const handleStopTimer = async () => {
     await showToast({ style: Toast.Style.Animated, title: "Stopping timer..." });
 
-    stopTrackerTimer()
+    api
+      .stopTrackerTimer()
       .then(async (stoppedTimer) => {
         await showToast({
           style: Toast.Style.Success,

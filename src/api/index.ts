@@ -6,7 +6,7 @@ type Prettify<T> = {
   [K in keyof T]: T[K];
 } & {};
 
-export const getTransactions = async (query?: string) => {
+const getTransactions = async (query?: string) => {
   const midday = getMiddayClient();
 
   const transactions = await midday.transactions.list({
@@ -17,7 +17,7 @@ export const getTransactions = async (query?: string) => {
   return transactions.data;
 };
 
-export const getSpendings = async ({ from, to }: { from: Date; to: Date }) => {
+const getSpendings = async ({ from, to }: { from: Date; to: Date }) => {
   const midday = getMiddayClient();
 
   const spendings = await midday.metrics
@@ -97,7 +97,7 @@ type SearchResults = Array<
   >
 >;
 
-export const globalSearch = async (query?: string) => {
+const globalSearch = async (query?: string) => {
   const token = getGlobalToken();
 
   const res = await fetch(`https://api.midday.ai/search?searchTerm=${query}`, {
@@ -116,7 +116,7 @@ export type CreateCustomerArgs = Omit<
   "country"
 > & { country: Country["code"] };
 
-export const createCustomer = async (args: CreateCustomerArgs) => {
+const createCustomer = async (args: CreateCustomerArgs) => {
   const midday = getMiddayClient();
 
   const createdCustomer = await midday.customers.create(args);
@@ -124,7 +124,7 @@ export const createCustomer = async (args: CreateCustomerArgs) => {
   return createdCustomer;
 };
 
-export const getTrackerProjects = async () => {
+const getTrackerProjects = async () => {
   const midday = getMiddayClient();
 
   console.log("FETCHING TRACKER PROJECTS");
@@ -143,7 +143,7 @@ export const getTrackerProjects = async () => {
   return trackerProjectsWithTimer;
 };
 
-export const startTrackerTimer = async (projectId: string) => {
+const startTrackerTimer = async (projectId: string) => {
   const midday = getMiddayClient();
 
   const startedTimer = await midday.trackerTimer.startTimer({
@@ -153,10 +153,20 @@ export const startTrackerTimer = async (projectId: string) => {
   return startedTimer.data;
 };
 
-export const stopTrackerTimer = async () => {
+const stopTrackerTimer = async () => {
   const midday = getMiddayClient();
 
   const stoppedTimer = await midday.trackerTimer.stopTimer({});
 
   return stoppedTimer.data;
+};
+
+export const api = {
+  getTransactions,
+  getSpendings,
+  globalSearch,
+  createCustomer,
+  getTrackerProjects,
+  startTrackerTimer,
+  stopTrackerTimer,
 };
