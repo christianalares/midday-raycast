@@ -1,12 +1,16 @@
-import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
-import { useTrackerProjects } from "./hooks/use-tracker";
-import { withMiddayClient } from "./with-midday-client";
-import { useEffect, useState } from "react";
-import { formatCurrency, formatDurationFromSeconds, formatTimerDuration } from "./utils";
+import { Action, ActionPanel, captureException, Color, Icon, Image, List, showToast, Toast } from '@raycast/api'
+import { showFailureToast } from '@raycast/utils'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useEffect, useState } from 'react'
+import { api } from './api'
+import { type QueryResults, queryKeys } from './api/queries'
+import { formatCurrency, formatDurationFromSeconds, formatTimerDuration } from './lib/utils'
+import { withMiddayClient } from './lib/with-midday-client'
 
 const Tracker = () => {
-  const { trackerProjects, isLoading, error } = useTrackerProjects();
-  const [showDetails, setShowDetails] = useState(false);
+  const { data: trackerProjects, isLoading, error } = useQuery(queryKeys.trackerProjects.list())
+
+  const [showDetails, setShowDetails] = useState(false)
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search projects" throttle={true} isShowingDetail={showDetails}>
@@ -18,11 +22,11 @@ const Tracker = () => {
         />
       )}
 
-      {!error && trackerProjects.length === 0 && (
+      {!error && trackerProjects?.length === 0 && (
         <List.EmptyView title="No spendings found!" icon={{ source: Icon.Warning, tintColor: Color.Orange }} />
       )}
 
-      {trackerProjects.map((project) => {
+      {trackerProjects?.map((project) => {
         return (
           <ProjectListItem
             key={project.id}
@@ -30,38 +34,83 @@ const Tracker = () => {
             showDetails={showDetails}
             setShowDetails={setShowDetails}
           />
-        );
+        )
       })}
     </List>
-  );
-};
+  )
+}
 
 type ProjectListItemProps = {
-  project: ReturnType<typeof useTrackerProjects>["trackerProjects"][number];
-  showDetails: boolean;
-  setShowDetails: (showDetails: boolean) => void;
-};
+  project: QueryResults['trackerProjects']['list'][number]
+  showDetails: boolean
+  setShowDetails: (showDetails: boolean) => void
+}
 
 const ProjectListItem = ({ project, showDetails, setShowDetails }: ProjectListItemProps) => {
-  const [elapsedTimer, setElapsedTimer] = useState(project.timer?.elapsedTime);
+  const queryClient = useQueryClient()
+  const [elapsedTimer, setElapsedTimer] = useState(project.timer?.elapsedTime)
 
-  const assignedTo = project.users?.at(0);
+  const assignedTo = project.users?.at(0)
+
+  const handleStartTimer = async () => {
+    await showToast({ style: Toast.Style.Animated, title: 'Starting timer...' })
+
+    api
+      .startTrackerTimer(project.id)
+      .then(async (startedTimer) => {
+        await showToast({
+          style: Toast.Style.Success,
+          title: '✅ Timer started',
+          message: `Timer started for ${startedTimer.project.name}`,
+        })
+
+        console.log('Calling revalidate after timer start...')
+        queryClient.invalidateQueries({ queryKey: ['tracker-projects'] })
+      })
+      .catch(async (err) => {
+        captureException(err)
+
+        await showFailureToast(err, { title: '❗ Failed to start timer' })
+      })
+  }
+
+  const handleStopTimer = async () => {
+    await showToast({ style: Toast.Style.Animated, title: 'Stopping timer...' })
+
+    api
+      .stopTrackerTimer()
+      .then(async (stoppedTimer) => {
+        await showToast({
+          style: Toast.Style.Success,
+          title: '✅ Timer stopped',
+          message: `Timer stopped for ${stoppedTimer.project.name}`,
+        })
+
+        console.log('Calling revalidate after timer stop...')
+        queryClient.invalidateQueries({ queryKey: ['tracker-projects'] })
+      })
+      .catch(async (err) => {
+        captureException(err)
+
+        await showFailureToast(err, { title: '❗ Failed to stop timer' })
+      })
+  }
 
   useEffect(() => {
-    let timer: NodeJS.Timeout | null = null;
+    let timer: NodeJS.Timeout | null = null
 
     if (project.timer) {
       timer = setInterval(() => {
-        setElapsedTimer((prev) => (prev ? prev + 1 : undefined));
-      }, 1000);
+        setElapsedTimer((prev) => (prev ? prev + 1 : undefined))
+      }, 1000)
     }
 
     return () => {
       if (timer) {
-        clearInterval(timer);
+        clearInterval(timer)
       }
-    };
-  }, [project.timer]);
+    }
+  }, [project.timer])
 
   return (
     <List.Item
@@ -99,8 +148,8 @@ const ProjectListItem = ({ project, showDetails, setShowDetails }: ProjectListIt
 
               <List.Item.Detail.Metadata.TagList title="Status">
                 <List.Item.Detail.Metadata.TagList.Item
-                  text={project.status === "in_progress" ? "In Progress" : "Completed"}
-                  color={project.status === "in_progress" ? Color.Blue : Color.Green}
+                  text={project.status === 'in_progress' ? 'In Progress' : 'Completed'}
+                  color={project.status === 'in_progress' ? Color.Blue : Color.Green}
                 />
               </List.Item.Detail.Metadata.TagList>
 
@@ -119,7 +168,7 @@ const ProjectListItem = ({ project, showDetails, setShowDetails }: ProjectListIt
 
               <List.Item.Detail.Metadata.Label
                 title="Total amount"
-                text={formatCurrency(project.totalAmount, project.currency ?? "USD")}
+                text={formatCurrency(project.totalAmount, project.currency ?? 'USD')}
               />
 
               {project.description && (
@@ -132,28 +181,38 @@ const ProjectListItem = ({ project, showDetails, setShowDetails }: ProjectListIt
       actions={
         <ActionPanel>
           <Action
-            title={showDetails ? "Hide Details" : "Show Details"}
+            title={showDetails ? 'Hide Details' : 'Show Details'}
             onAction={() => setShowDetails(!showDetails)}
             icon={showDetails ? Icon.EyeDisabled : Icon.Eye}
           />
 
           <ActionPanel.Section>
-            <Action
-              title="Start timer"
-              onAction={() => {
-                console.log("start timer");
-              }}
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
-              icon={{
-                source: Icon.CircleProgress100,
-                tintColor: Color.Red,
-              }}
-            />
+            {elapsedTimer ? (
+              <Action
+                title="Stop timer"
+                onAction={handleStopTimer}
+                shortcut={{ modifiers: ['cmd'], key: 'r' }}
+                icon={{
+                  source: Icon.Stop,
+                  tintColor: Color.Red,
+                }}
+              />
+            ) : (
+              <Action
+                title="Start timer"
+                onAction={handleStartTimer}
+                shortcut={{ modifiers: ['cmd'], key: 'r' }}
+                icon={{
+                  source: Icon.CircleProgress100,
+                  tintColor: Color.Red,
+                }}
+              />
+            )}
           </ActionPanel.Section>
         </ActionPanel>
       }
     />
-  );
-};
+  )
+}
 
-export default withMiddayClient(Tracker);
+export default withMiddayClient(Tracker)
