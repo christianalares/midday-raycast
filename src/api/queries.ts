@@ -56,8 +56,6 @@ export const queryKeys = {
   },
 }
 
-type Doc = QueryResults['customers']['getById']
-
 export type QueryResults<T = typeof queryKeys> = {
   [K in keyof T]: T[K] extends (...args: any[]) => infer R
     ? R extends QueryOptions<infer TData, any, any, any>
