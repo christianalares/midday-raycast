@@ -1,59 +1,67 @@
-import { createQueryKeyStore } from '@lukemorales/query-key-factory'
-import { api } from '.'
+import { api, type GetDocumentsArgs } from '.'
+import { queryOptions, type QueryOptions } from '@tanstack/react-query'
 
-export const queryKeys = createQueryKeyStore({
-  globalSearch: {
-    list: (q?: string) => ({
-      queryKey: [q],
+export const queryKeys = {
+  globalSearch: (q?: string) => {
+    return queryOptions({
+      queryKey: ['global-search', q],
       queryFn: () => api.globalSearch(q),
-    }),
+    })
+  },
+  documents: {
+    list: (args: GetDocumentsArgs) => {
+      return queryOptions({
+        queryKey: ['documents', args],
+        queryFn: () => api.getDocuments(args),
+      })
+    },
+    getById: (id: string) => {
+      return queryOptions({
+        queryKey: ['documents', id],
+        queryFn: () => api.getDocumentById(id),
+      })
+    },
   },
   spendings: {
-    list: ({ from, to }: { from: Date; to: Date }) => ({
-      queryKey: [{ from, to }],
-      queryFn: () => api.getSpendings({ from, to }),
-    }),
+    list: ({ from, to }: { from: Date; to: Date }) => {
+      return queryOptions({
+        queryKey: ['spendings', { from, to }],
+        queryFn: () => api.getSpendings({ from, to }),
+      })
+    },
   },
   trackerProjects: {
-    list: () => ({
-      queryKey: ['tracker-projects'],
-      queryFn: () => api.getTrackerProjects(),
-    }),
+    list: () => {
+      return queryOptions({
+        queryKey: ['tracker-projects'],
+        queryFn: () => api.getTrackerProjects(),
+      })
+    },
   },
   transactions: {
-    list: (q?: string) => ({
-      queryKey: [q],
-      queryFn: () => api.getTransactions(q),
-    }),
+    list: (q?: string) => {
+      return queryOptions({
+        queryKey: ['transactions', q],
+        queryFn: () => api.getTransactions(q),
+      })
+    },
   },
   customers: {
-    get: (id: string) => ({
-      queryKey: [id],
-      queryFn: () => api.getCustomer(id),
-    }),
+    getById: (id: string) => {
+      return queryOptions({
+        queryKey: ['customers', id],
+        queryFn: () => api.getCustomer(id),
+      })
+    },
   },
-})
-
-// Type helper to infer the return type of a query function from query key factory structure
-type InferQueryResult<T> = T extends (...args: any[]) => infer TReturn
-  ? TReturn extends { queryFn?: infer TFn }
-    ? TFn extends (...args: any[]) => any
-      ? Awaited<ReturnType<TFn>>
-      : never
-    : never
-  : T extends { queryFn?: infer TFn }
-    ? TFn extends (...args: any[]) => any
-      ? Awaited<ReturnType<TFn>>
-      : never
-    : never
-
-// Type helper to create QueryResults type from the entire query key store
-type InferQueryKeyStoreResults<T> = {
-  [K in keyof T]: T[K] extends Record<string, any>
-    ? {
-        [P in keyof T[K] as P extends '_def' ? never : P]: InferQueryResult<T[K][P]>
-      }
-    : InferQueryResult<T[K]>
 }
 
-export type QueryResults = InferQueryKeyStoreResults<typeof queryKeys>
+type Doc = QueryResults['customers']['getById']
+
+export type QueryResults<T = typeof queryKeys> = {
+  [K in keyof T]: T[K] extends (...args: any[]) => infer R
+    ? R extends QueryOptions<infer TData, any, any, any>
+      ? TData
+      : never
+    : QueryResults<T[K]>
+}

@@ -130,6 +130,24 @@ const globalSearch = async (query?: string) => {
   // return search
 }
 
+export type GetDocumentsArgs = NonNullable<Parameters<ReturnType<typeof getMiddayClient>['documents']['list']>[0]>
+
+const getDocuments = async (args: GetDocumentsArgs) => {
+  const midday = getMiddayClient()
+
+  const documents = await tryCatch(midday.documents.list(args))
+
+  return documents
+}
+
+const getDocumentById = async (id: string) => {
+  const midday = getMiddayClient()
+
+  const document = await tryCatch(midday.documents.get({ id }))
+
+  return document
+}
+
 export type CreateCustomerArgs = NonNullable<Parameters<ReturnType<typeof getMiddayClient>['customers']['create']>[0]>
 
 const createCustomer = async (args: CreateCustomerArgs) => {
@@ -208,6 +226,8 @@ export const api = {
   getSpendings,
   globalSearch,
   getCustomer,
+  getDocuments,
+  getDocumentById,
   createCustomer,
   updateCustomer,
   deleteCustomer,

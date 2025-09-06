@@ -45,3 +45,14 @@ export const getCountryByCode = (code: string) => {
 
   return null
 }
+
+export const formatSize = (bytes: number) => {
+  const units = ['byte', 'kilobyte', 'megabyte', 'gigabyte', 'terabyte']
+
+  const unitIndex = Math.max(0, Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1))
+
+  return Intl.NumberFormat(undefined, {
+    style: 'unit',
+    unit: units[unitIndex],
+  }).format(+Math.round(bytes / 1024 ** unitIndex))
+}

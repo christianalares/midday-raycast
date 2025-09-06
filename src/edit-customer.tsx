@@ -10,15 +10,15 @@ type Props = {
 }
 
 const EditCustomer = ({ customerId }: Props) => {
-  const { data: customer, isLoading, error } = useQuery(queryKeys.customers.get(customerId))
+  const { data: customer, isLoading, error } = useQuery(queryKeys.customers.getById(customerId))
 
   const queryClient = useQueryClient()
 
   const editCustomerMutation = useMutation({
     mutationFn: api.updateCustomer,
     onSuccess: (updatedCustomer) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.globalSearch._def })
-      queryClient.invalidateQueries({ queryKey: queryKeys.customers.get(updatedCustomer.id).queryKey })
+      queryClient.invalidateQueries({ queryKey: queryKeys.globalSearch().queryKey })
+      queryClient.invalidateQueries({ queryKey: queryKeys.customers.getById(updatedCustomer.id).queryKey })
     },
     meta: {
       toastTitle: {

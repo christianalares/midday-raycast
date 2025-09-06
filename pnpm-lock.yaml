@@ -8,9 +8,6 @@ importers:
 
   .:
     dependencies:
-      '@lukemorales/query-key-factory':
-        specifier: ^1.3.4
-        version: 1.3.4(@tanstack/query-core@5.85.9)(@tanstack/react-query@5.85.9(react@19.0.0))
       '@midday-ai/sdk':
         specifier: ^0.4.1
         version: 0.4.1
@@ -391,13 +388,6 @@ packages:
     peerDependenciesMeta:
       '@types/node':
         optional: true
-
-  '@lukemorales/query-key-factory@1.3.4':
-    resolution: {integrity: sha512-A3frRDdkmaNNQi6mxIshsDk4chRXWoXa05US8fBo4kci/H+lVmujS6QrwQLLGIkNIRFGjMqp2uKjC4XsLdydRw==}
-    engines: {node: '>=14'}
-    peerDependencies:
-      '@tanstack/query-core': '>= 4.0.0'
-      '@tanstack/react-query': '>= 4.0.0'
 
   '@midday-ai/sdk@0.4.1':
     resolution: {integrity: sha512-3VoSS7Y0AeIvjcP47tM4thZhsWIJIEeStWdHLKp5naFglGS8is2iZnrgLxTTR4sgXSRU/D95Mh8olr9uQIhJPg==}
@@ -1389,11 +1379,6 @@ snapshots:
   '@inquirer/type@3.0.8(@types/node@22.13.10)':
     optionalDependencies:
       '@types/node': 22.13.10
-
-  '@lukemorales/query-key-factory@1.3.4(@tanstack/query-core@5.85.9)(@tanstack/react-query@5.85.9(react@19.0.0))':
-    dependencies:
-      '@tanstack/query-core': 5.85.9
-      '@tanstack/react-query': 5.85.9(react@19.0.0)
 
   '@midday-ai/sdk@0.4.1':
     dependencies:

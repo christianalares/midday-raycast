@@ -7,7 +7,7 @@ import { withMiddayClient } from './lib/with-midday-client'
 import TransactionsComponent from './transactions'
 import { api } from './api'
 import { useToggleState } from './hooks/use-toggle-state'
-import { getCountryByCode } from './lib/utils'
+import { formatSize, getCountryByCode } from './lib/utils'
 import EditCustomer from './edit-customer'
 
 type Props = {
@@ -17,7 +17,7 @@ type Props = {
 const Search = ({ selectedId }: Props) => {
   const [showDetails, toggleShowDetails] = useToggleState()
   const [query, setQuery] = useState('')
-  const { data, isLoading, error } = useQuery(queryKeys.globalSearch.list(query))
+  const { data, isLoading, error } = useQuery(queryKeys.globalSearch(query))
 
   const search = data ?? []
 
@@ -48,7 +48,7 @@ const Search = ({ selectedId }: Props) => {
         <List.EmptyView title="No search results found!" icon={{ source: Icon.Warning, tintColor: Color.Orange }} />
       )}
 
-      <VaultList results={vaultResults} />
+      <VaultList results={vaultResults} showDetails={showDetails} toggleShowDetails={toggleShowDetails} />
       <CustomersList results={customerResults} showDetails={showDetails} toggleShowDetails={toggleShowDetails} />
       <InvoicesList results={invoicesResults} />
       <TransactionsList results={transactionResults} />
@@ -58,14 +58,44 @@ const Search = ({ selectedId }: Props) => {
   )
 }
 
-type ResultItem = QueryResults['globalSearch']['list'][number]
+type ResultItem = QueryResults['globalSearch'][number]
 type ListResultsByType<T extends ResultItem['type']> = Array<Extract<ResultItem, { type: T }>>
 
-const VaultList = ({ results }: { results: ListResultsByType<'vault'> }) => {
+// LISTS
+
+const VaultList = ({
+  results,
+  showDetails,
+  toggleShowDetails,
+}: {
+  results: ListResultsByType<'vault'>
+  showDetails: boolean
+  toggleShowDetails: () => void
+}) => {
   return (
     <List.Section title="Vault">
       {results.map((result) => (
-        <List.Item key={result.id} id={result.id} title={result.data.path_tokens.at(-1) ?? ''} icon={Icon.Document} />
+        <List.Item
+          key={result.id}
+          id={result.id}
+          title={result.data.path_tokens.at(-1) ?? ''}
+          icon={Icon.Document}
+          detail={<VaultDetail result={result} shouldFetch={showDetails} />}
+          actions={
+            <ActionPanel>
+              <Action
+                title={showDetails ? 'Hide Details' : 'Show Details'}
+                onAction={toggleShowDetails}
+                icon={showDetails ? Icon.EyeDisabled : Icon.Eye}
+              />
+
+              <Action.OpenInBrowser
+                url={`https://app.midday.ai/vault?documentId=${result.id}`}
+                title="View document on Midday"
+              />
+            </ActionPanel>
+          }
+        />
       ))}
 
       <List.Item
@@ -100,7 +130,7 @@ const CustomersList = ({
   const deleteCustomerMutation = useMutation({
     mutationFn: api.deleteCustomer,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.globalSearch._def })
+      queryClient.invalidateQueries({ queryKey: queryKeys.globalSearch().queryKey })
     },
     meta: {
       toastTitle: {
@@ -272,6 +302,66 @@ const InboxList = ({ results }: { results: ListResultsByType<'inbox'> }) => {
   )
 }
 
+// DETAILS
+
+const VaultDetail = ({ result, shouldFetch }: { result: ListResultsByType<'vault'>[number]; shouldFetch: boolean }) => {
+  const { data: document, isLoading } = useQuery({
+    ...queryKeys.documents.getById(result.id),
+    enabled: shouldFetch,
+  })
+
+  if (!document) {
+    return null
+  }
+
+  const getProcessingStatus = (): { text: string; color: Color } => {
+    // 'pending' | 'processing' | 'completed' | 'failed'
+    switch (document.processingStatus) {
+      case 'pending':
+        return { text: 'Pending', color: Color.Orange }
+      case 'processing':
+        return { text: 'Processing', color: Color.Yellow }
+      case 'completed':
+        return { text: 'Completed', color: Color.Green }
+      case 'failed':
+        return { text: 'Failed', color: Color.Red }
+      default:
+        return { text: 'Unknown', color: Color.PrimaryText }
+    }
+  }
+
+  const processingStatus = getProcessingStatus()
+
+  return (
+    <List.Item.Detail
+      isLoading={isLoading}
+      markdown={document.summary ?? null}
+      metadata={
+        <List.Item.Detail.Metadata>
+          {!document.summary && document.title && (
+            <List.Item.Detail.Metadata.Label title="Title" text={document.title} />
+          )}
+          <List.Item.Detail.Metadata.Label title="Filename" text={document.pathTokens.at(-1)} />
+          {document.metadata?.mimetype && (
+            <List.Item.Detail.Metadata.Label title="Mime Type" text={document.metadata.mimetype} />
+          )}
+          {document.metadata?.size && (
+            <List.Item.Detail.Metadata.Label title="Size" text={formatSize(document.metadata.size)} />
+          )}
+
+          <List.Item.Detail.Metadata.Label
+            title="Processing Status"
+            text={{
+              value: processingStatus.text,
+              color: processingStatus.color,
+            }}
+          />
+        </List.Item.Detail.Metadata>
+      }
+    />
+  )
+}
+
 const CustomerDetail = ({
   result,
   shouldFetch,
@@ -280,7 +370,7 @@ const CustomerDetail = ({
   shouldFetch: boolean
 }) => {
   const { data: customer, isLoading } = useQuery({
-    ...queryKeys.customers.get(result.id),
+    ...queryKeys.customers.getById(result.id),
     enabled: shouldFetch,
   })
 
