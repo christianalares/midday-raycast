@@ -1,6 +1,5 @@
-import { Action, ActionPanel, captureException, Color, Icon, Image, List, showToast, Toast } from '@raycast/api'
-import { showFailureToast } from '@raycast/utils'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { Action, ActionPanel, Color, Icon, Image, List } from '@raycast/api'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { api } from './api'
 import { type QueryResults, queryKeys } from './api/queries'
@@ -47,54 +46,39 @@ type ProjectListItemProps = {
 }
 
 const ProjectListItem = ({ project, showDetails, setShowDetails }: ProjectListItemProps) => {
-  const queryClient = useQueryClient()
   const [elapsedTimer, setElapsedTimer] = useState(project.timer?.elapsedTime)
 
+  const queryClient = useQueryClient()
+
+  const startTrackerTimerMutation = useMutation({
+    mutationFn: api.startTrackerTimer,
+    meta: {
+      toastTitle: {
+        loading: 'Starting timer...',
+        success: `✅ Timer started for ${project.name}`,
+        error: '❌ Failed to start timer',
+      },
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.trackerProjects.list().queryKey })
+    },
+  })
+
+  const stopTrackerTimerMutation = useMutation({
+    mutationFn: api.stopTrackerTimer,
+    meta: {
+      toastTitle: {
+        loading: 'Stopping timer...',
+        success: `✅ Timer stopped for ${project.name}`,
+        error: '❌ Failed to stop timer',
+      },
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.trackerProjects.list().queryKey })
+    },
+  })
+
   const assignedTo = project.users?.at(0)
-
-  const handleStartTimer = async () => {
-    await showToast({ style: Toast.Style.Animated, title: 'Starting timer...' })
-
-    api
-      .startTrackerTimer(project.id)
-      .then(async (startedTimer) => {
-        await showToast({
-          style: Toast.Style.Success,
-          title: '✅ Timer started',
-          message: `Timer started for ${startedTimer.project.name}`,
-        })
-
-        console.log('Calling revalidate after timer start...')
-        queryClient.invalidateQueries({ queryKey: ['tracker-projects'] })
-      })
-      .catch(async (err) => {
-        captureException(err)
-
-        await showFailureToast(err, { title: '❗ Failed to start timer' })
-      })
-  }
-
-  const handleStopTimer = async () => {
-    await showToast({ style: Toast.Style.Animated, title: 'Stopping timer...' })
-
-    api
-      .stopTrackerTimer()
-      .then(async (stoppedTimer) => {
-        await showToast({
-          style: Toast.Style.Success,
-          title: '✅ Timer stopped',
-          message: `Timer stopped for ${stoppedTimer.project.name}`,
-        })
-
-        console.log('Calling revalidate after timer stop...')
-        queryClient.invalidateQueries({ queryKey: ['tracker-projects'] })
-      })
-      .catch(async (err) => {
-        captureException(err)
-
-        await showFailureToast(err, { title: '❗ Failed to stop timer' })
-      })
-  }
 
   useEffect(() => {
     let timer: NodeJS.Timeout | null = null
@@ -103,6 +87,8 @@ const ProjectListItem = ({ project, showDetails, setShowDetails }: ProjectListIt
       timer = setInterval(() => {
         setElapsedTimer((prev) => (prev ? prev + 1 : undefined))
       }, 1000)
+    } else {
+      setElapsedTimer(undefined)
     }
 
     return () => {
@@ -190,7 +176,7 @@ const ProjectListItem = ({ project, showDetails, setShowDetails }: ProjectListIt
             {elapsedTimer ? (
               <Action
                 title="Stop timer"
-                onAction={handleStopTimer}
+                onAction={() => stopTrackerTimerMutation.mutate()}
                 shortcut={{ modifiers: ['cmd'], key: 'r' }}
                 icon={{
                   source: Icon.Stop,
@@ -200,7 +186,7 @@ const ProjectListItem = ({ project, showDetails, setShowDetails }: ProjectListIt
             ) : (
               <Action
                 title="Start timer"
-                onAction={handleStartTimer}
+                onAction={() => startTrackerTimerMutation.mutate(project.id)}
                 shortcut={{ modifiers: ['cmd'], key: 'r' }}
                 icon={{
                   source: Icon.CircleProgress100,
