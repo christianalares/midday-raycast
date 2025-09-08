@@ -32,6 +32,14 @@ const getTransactions = async (query?: string) => {
   return transactions.data
 }
 
+const getTransactionById = async (id: string) => {
+  const midday = getMiddayClient()
+
+  const transaction = await tryCatch(midday.transactions.get({ id }))
+
+  return transaction
+}
+
 const getSpendings = async ({ from, to }: { from: Date; to: Date }) => {
   const midday = getMiddayClient()
 
@@ -223,6 +231,7 @@ const stopTrackerTimer = async () => {
 
 export const api = {
   getTransactions,
+  getTransactionById,
   getSpendings,
   globalSearch,
   getCustomer,

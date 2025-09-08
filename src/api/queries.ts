@@ -45,6 +45,12 @@ export const queryKeys = {
         queryFn: () => api.getTransactions(q),
       })
     },
+    getById: (id: string) => {
+      return queryOptions({
+        queryKey: ['transactions', id],
+        queryFn: () => api.getTransactionById(id),
+      })
+    },
   },
   customers: {
     getById: (id: string) => {

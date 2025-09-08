@@ -9,6 +9,7 @@ import { api } from './api'
 import { useToggleState } from './hooks/use-toggle-state'
 import { formatSize, getCountryByCode } from './lib/utils'
 import EditCustomer from './edit-customer'
+import { TransactionDetails } from './components/transaction-details'
 
 type Props = {
   selectedId?: string
@@ -51,7 +52,7 @@ const Search = ({ selectedId }: Props) => {
       <VaultList results={vaultResults} showDetails={showDetails} toggleShowDetails={toggleShowDetails} />
       <CustomersList results={customerResults} showDetails={showDetails} toggleShowDetails={toggleShowDetails} />
       <InvoicesList results={invoicesResults} />
-      <TransactionsList results={transactionResults} />
+      <TransactionsList results={transactionResults} showDetails={showDetails} toggleShowDetails={toggleShowDetails} />
       {/* TODO: Add tracker */}
       <InboxList results={inboxResults} />
     </List>
@@ -255,17 +256,40 @@ const InvoicesList = ({ results }: { results: ListResultsByType<'invoice'> }) =>
   )
 }
 
-const TransactionsList = ({ results }: { results: ListResultsByType<'transaction'> }) => {
+const TransactionsList = ({
+  results,
+  showDetails,
+  toggleShowDetails,
+}: {
+  results: ListResultsByType<'transaction'>
+  showDetails: boolean
+  toggleShowDetails: () => void
+}) => {
   return (
     <List.Section title="Transactions">
       {results.map((result) => (
-        <List.Item key={result.id} id={result.id} title={result.data.name} icon={Icon.List} />
+        <List.Item
+          key={result.id}
+          id={result.id}
+          title={result.data.name}
+          icon={Icon.List}
+          detail={<TransactionDetails transactionId={result.id} />}
+          actions={
+            <ActionPanel>
+              <Action
+                title={showDetails ? 'Hide Details' : 'Show Details'}
+                onAction={toggleShowDetails}
+                icon={showDetails ? Icon.EyeDisabled : Icon.Eye}
+              />
+            </ActionPanel>
+          }
+        />
       ))}
 
       {/*  */}
       {/* <List.Item title="Create transaction" icon={Icon.ArrowNe} /> */}
       <List.Item
-        title="View transactions"
+        title="View all transactions"
         id="view-transactions"
         icon={{
           source: Icon.ArrowRight,
@@ -273,7 +297,7 @@ const TransactionsList = ({ results }: { results: ListResultsByType<'transaction
         }}
         actions={
           <ActionPanel>
-            <Action.Push title="View Transactions" target={<TransactionsComponent />} />
+            <Action.Push title="View all Transactions" target={<TransactionsComponent />} />
           </ActionPanel>
         }
       />
@@ -383,7 +407,7 @@ const CustomerDetail = ({
   return (
     <List.Item.Detail
       isLoading={isLoading}
-      markdown={isLoading ? 'Loading...' : null}
+      markdown={isLoading ? 'Loading...' : undefined}
       metadata={
         isLoading ? null : (
           <List.Item.Detail.Metadata>
