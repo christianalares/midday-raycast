@@ -229,6 +229,26 @@ const stopTrackerTimer = async () => {
   return stoppedTimer.data
 }
 
+export type GetTrackerEntriesArgs = {
+  from: Date
+  to: Date
+  projectId: string
+}
+
+const getTrackerEntries = async (args: GetTrackerEntriesArgs) => {
+  const midday = getMiddayClient()
+
+  const trackerEntries = await tryCatch(
+    midday.trackerEntries.list({
+      from: args.from.toISOString().split('T')[0],
+      to: args.to.toISOString().split('T')[0],
+      projectId: args.projectId,
+    }),
+  )
+
+  return trackerEntries
+}
+
 export const api = {
   getTransactions,
   getTransactionById,
@@ -243,4 +263,5 @@ export const api = {
   getTrackerProjects,
   startTrackerTimer,
   stopTrackerTimer,
+  getTrackerEntries,
 }

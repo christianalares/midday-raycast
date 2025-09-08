@@ -1,4 +1,4 @@
-import { api, type GetDocumentsArgs } from '.'
+import { api, GetTrackerEntriesArgs, type GetDocumentsArgs } from '.'
 import { queryOptions, type QueryOptions } from '@tanstack/react-query'
 
 export const queryKeys = {
@@ -35,6 +35,14 @@ export const queryKeys = {
       return queryOptions({
         queryKey: ['tracker-projects'],
         queryFn: () => api.getTrackerProjects(),
+      })
+    },
+  },
+  trackerEntries: {
+    getByProjectId: (args: GetTrackerEntriesArgs) => {
+      return queryOptions({
+        queryKey: ['tracker-entries', args],
+        queryFn: () => api.getTrackerEntries(args),
       })
     },
   },

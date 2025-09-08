@@ -5,6 +5,7 @@ import { api } from './api'
 import { type QueryResults, queryKeys } from './api/queries'
 import { formatCurrency, formatDurationFromSeconds, formatTimerDuration } from './lib/utils'
 import { withMiddayClient } from './lib/with-midday-client'
+import TrackerEntries from './tracker-entries'
 
 const Tracker = () => {
   const { data: trackerProjects, isLoading, error } = useQuery(queryKeys.trackerProjects.list())
@@ -173,6 +174,8 @@ const ProjectListItem = ({ project, showDetails, setShowDetails }: ProjectListIt
           />
 
           <ActionPanel.Section>
+            <Action.Push title="View Tracker Entries" target={<TrackerEntries projectId={project.id} />} />
+
             {elapsedTimer ? (
               <Action
                 title="Stop timer"
