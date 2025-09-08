@@ -12,7 +12,7 @@ export const formatDurationFromSeconds = (totalSeconds: number) => {
   const hours = Math.floor(totalSeconds / 3600)
   const minutes = Math.floor((totalSeconds % 3600) / 60)
 
-  return formatDuration(
+  const formattedDuration = formatDuration(
     {
       hours,
       minutes,
@@ -22,6 +22,8 @@ export const formatDurationFromSeconds = (totalSeconds: number) => {
       delimiter: ', ',
     },
   )
+
+  return formattedDuration
 }
 
 export const formatTimerDuration = (totalSeconds: number) => {
