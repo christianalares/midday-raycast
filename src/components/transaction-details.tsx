@@ -1,6 +1,6 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { queryKeys } from '../api/queries'
 import { Color, Icon, List } from '@raycast/api'
+import { useQuery } from '@tanstack/react-query'
+import { queryKeys } from '../api/queries'
 import { formatCurrency } from '../lib/utils'
 
 type Props = {
@@ -8,7 +8,7 @@ type Props = {
 }
 
 export const TransactionDetails = ({ transactionId }: Props) => {
-  const { data: transaction, isLoading, error } = useQuery(queryKeys.transactions.getById(transactionId))
+  const { data: transaction, isLoading } = useQuery(queryKeys.transactions.getById(transactionId))
 
   if (!transaction) {
     return null
