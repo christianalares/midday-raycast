@@ -24,10 +24,12 @@ const tryCatch = async <T>(promise: Promise<T>): Promise<T> => {
 const getTransactions = async (query?: string) => {
   const midday = getMiddayClient()
 
-  const transactions = await midday.transactions.list({
-    pageSize: 100,
-    q: query,
-  })
+  const transactions = await tryCatch(
+    midday.transactions.list({
+      pageSize: 100,
+      q: query,
+    }),
+  )
 
   return transactions.data
 }
@@ -131,9 +133,9 @@ const globalSearch = async (query?: string) => {
 
   return search
 
-  // const midday = getMiddayClient();
+  // const midday = getMiddayClient()
 
-  // const search = await tryCatch(midday.search.search({ searchTerm: query }));
+  // const search = await tryCatch(midday.search.search({ searchTerm: query }))
 
   // return search
 }
@@ -212,11 +214,7 @@ const getTrackerProjects = async () => {
 const startTrackerTimer = async (projectId: string) => {
   const midday = getMiddayClient()
 
-  const startedTimer = await tryCatch(
-    midday.trackerTimer.startTimer({
-      projectId,
-    }),
-  )
+  const startedTimer = await tryCatch(midday.trackerTimer.startTimer({ projectId }))
 
   return startedTimer.data
 }
@@ -249,6 +247,18 @@ const getTrackerEntries = async (args: GetTrackerEntriesArgs) => {
   return trackerEntries
 }
 
+export type CreateTrackerEntryArgs = NonNullable<
+  Parameters<ReturnType<typeof getMiddayClient>['trackerEntries']['create']>[0]
+>
+
+const createTrackerEntry = async (args: CreateTrackerEntryArgs) => {
+  const midday = getMiddayClient()
+
+  const createdTrackerEntry = await tryCatch(midday.trackerEntries.create(args))
+
+  return createdTrackerEntry
+}
+
 export const api = {
   getTransactions,
   getTransactionById,
@@ -264,4 +274,5 @@ export const api = {
   startTrackerTimer,
   stopTrackerTimer,
   getTrackerEntries,
+  createTrackerEntry,
 }

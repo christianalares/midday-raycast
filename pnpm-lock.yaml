@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@midday-ai/sdk':
-        specifier: ^0.4.1
-        version: 0.4.1
+        specifier: ^0.4.2
+        version: 0.4.2
       '@raycast/api':
         specifier: ^1.102.6
         version: 1.102.6(@types/node@22.13.10)(@types/react@19.0.10)
@@ -389,8 +389,8 @@ packages:
       '@types/node':
         optional: true
 
-  '@midday-ai/sdk@0.4.1':
-    resolution: {integrity: sha512-3VoSS7Y0AeIvjcP47tM4thZhsWIJIEeStWdHLKp5naFglGS8is2iZnrgLxTTR4sgXSRU/D95Mh8olr9uQIhJPg==}
+  '@midday-ai/sdk@0.4.2':
+    resolution: {integrity: sha512-P+MHBzUxNJ6EVxWIYg7YFcNM/EnpMKaWfX6Fmqw53bRFO+ulasAU2wMcwRmmsydMT8V71FEY35fJGqK2UErQqA==}
     hasBin: true
     peerDependencies:
       '@modelcontextprotocol/sdk': '>=1.5.0 <1.10.0'
@@ -1380,7 +1380,7 @@ snapshots:
     optionalDependencies:
       '@types/node': 22.13.10
 
-  '@midday-ai/sdk@0.4.1':
+  '@midday-ai/sdk@0.4.2':
     dependencies:
       zod: 3.25.76
 

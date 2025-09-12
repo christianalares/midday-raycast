@@ -1,5 +1,14 @@
 import { formatDuration } from 'date-fns'
 import { countries } from './countries'
+import type { Form } from '@raycast/api'
+
+export const cleanFormProps = <T extends Form.ItemProps<any>>(props: T) => {
+  return {
+    ...props,
+    value: props.value === null ? undefined : props.value,
+    defaultValue: props.defaultValue === null ? undefined : props.defaultValue,
+  }
+}
 
 export const formatCurrency = (amount: number, currency: string) => {
   return new Intl.NumberFormat(undefined, {

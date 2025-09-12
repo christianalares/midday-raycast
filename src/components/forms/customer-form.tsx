@@ -2,14 +2,9 @@ import { Action, ActionPanel, Form } from '@raycast/api'
 import { FormValidation, useForm } from '@raycast/utils'
 import { type CreateCustomerArgs } from '../../api'
 import { countries } from '../../lib/countries'
+import { cleanFormProps } from '../../lib/utils'
 
 type Customer = CreateCustomerArgs
-
-const cleanFormProps = (props: any) => ({
-  ...props,
-  value: props.value === null ? undefined : props.value,
-  defaultValue: props.defaultValue === null ? undefined : props.defaultValue,
-})
 
 type Props = {
   onSubmit: (values: Customer) => void
@@ -20,7 +15,7 @@ type Props = {
 
 export const CustomerForm = ({ onSubmit, initialValues, ctaText, isLoading }: Props) => {
   const form = useForm<CreateCustomerArgs>({
-    onSubmit: onSubmit,
+    onSubmit,
     initialValues,
     validation: {
       name: FormValidation.Required,
@@ -40,8 +35,8 @@ export const CustomerForm = ({ onSubmit, initialValues, ctaText, isLoading }: Pr
         </ActionPanel>
       }
     >
-      <Form.TextField title="Name" placeholder="Acme Inc" {...form.itemProps.name} />
-      <Form.TextField title="Email" placeholder="acme@example.com" {...form.itemProps.email} />
+      <Form.TextField title="Name" placeholder="Acme Inc" {...cleanFormProps(form.itemProps.name)} />
+      <Form.TextField title="Email" placeholder="acme@example.com" {...cleanFormProps(form.itemProps.email)} />
       <Form.TextField
         title="Billing Email"
         info="This is an additional email that will be used to send invoices to."

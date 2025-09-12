@@ -174,7 +174,11 @@ const ProjectListItem = ({ project, showDetails, setShowDetails }: ProjectListIt
           />
 
           <ActionPanel.Section>
-            <Action.Push title="View Tracker Entries" target={<TrackerEntries projectId={project.id} />} />
+            <Action.Push
+              title="View Tracker Entries"
+              shortcut={{ modifiers: ['cmd'], key: 'return' }}
+              target={<TrackerEntries projectId={project.id} />}
+            />
 
             {elapsedTimer ? (
               <Action

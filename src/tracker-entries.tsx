@@ -7,12 +7,14 @@ import {
   endOfMonth,
   format,
   isSameDay,
+  set,
   startOfDay,
   startOfMonth,
   subMonths,
 } from 'date-fns'
 import { Fragment, useState } from 'react'
 import { queryKeys } from './api/queries'
+import CreateTrackerEntry from './create-tracker-entry'
 import { formatCurrency, formatDurationFromSeconds } from './lib/utils'
 import { withMiddayClient } from './lib/with-midday-client'
 
@@ -83,6 +85,21 @@ const TrackerEntries = ({ projectId, from, to }: Props) => {
                 <Action
                   title={showDetails ? 'Hide Details' : 'Show Details'}
                   onAction={() => setShowDetails(!showDetails)}
+                />
+
+                <Action.Push
+                  title="Create Tracker Entry"
+                  shortcut={{ modifiers: ['cmd'], key: 'return' }}
+                  target={
+                    <CreateTrackerEntry
+                      projectId={projectId}
+                      initialValues={{
+                        // Working 9 - 5 🎶 🎤
+                        start: set(new Date(day.date), { hours: 9, minutes: 0, seconds: 0 }),
+                        stop: set(new Date(day.date), { hours: 17, minutes: 0, seconds: 0 }),
+                      }}
+                    />
+                  }
                 />
 
                 <ActionPanel.Section title="Navigation">

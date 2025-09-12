@@ -17,7 +17,7 @@ const EditCustomer = ({ customerId }: Props) => {
   const editCustomerMutation = useMutation({
     mutationFn: api.updateCustomer,
     onSuccess: (updatedCustomer) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.globalSearch().queryKey })
+      queryClient.invalidateQueries({ queryKey: [queryKeys.globalSearch().queryKey.at(0)] })
       queryClient.invalidateQueries({ queryKey: queryKeys.customers.getById(updatedCustomer.id).queryKey })
     },
     meta: {

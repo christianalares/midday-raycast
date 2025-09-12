@@ -131,7 +131,7 @@ const CustomersList = ({
   const deleteCustomerMutation = useMutation({
     mutationFn: api.deleteCustomer,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.globalSearch().queryKey })
+      queryClient.invalidateQueries({ queryKey: [queryKeys.globalSearch().queryKey.at(0)] })
     },
     meta: {
       toastTitle: {
