@@ -7,13 +7,20 @@ import { formatCurrency } from './lib/utils'
 import { withMiddayClient } from './lib/with-midday-client'
 import { TransactionDetails } from './components/transaction-details'
 
-function TransactionsComponent() {
+type Props = {
+  selectedId?: string
+  showInitialDetails?: boolean
+}
+
+function TransactionsComponent({ selectedId, showInitialDetails }: Props) {
+  console.log({ selectedId, showInitialDetails })
+
   const [query, setQuery] = useState<string | undefined>(undefined)
   const { data, isLoading, error } = useQuery(queryKeys.transactions.list(query))
 
   const transactions = data ?? []
 
-  const [showDetails, setShowDetails] = useState(false)
+  const [showDetails, setShowDetails] = useState(showInitialDetails ?? false)
 
   return (
     <List
@@ -22,6 +29,7 @@ function TransactionsComponent() {
       isShowingDetail={showDetails}
       onSearchTextChange={setQuery}
       throttle={true}
+      selectedItemId={selectedId}
     >
       {error && (
         <List.EmptyView
@@ -39,6 +47,7 @@ function TransactionsComponent() {
         return (
           <List.Item
             key={tx.id}
+            id={tx.id}
             title={tx.name}
             accessories={[
               {
@@ -65,6 +74,7 @@ function TransactionsComponent() {
                   onAction={() => setShowDetails(!showDetails)}
                   icon={showDetails ? Icon.EyeDisabled : Icon.Eye}
                 />
+                <Action.CopyToClipboard title="Copy transaction ID" content={tx.id} icon={Icon.CopyClipboard} />
                 <Action.OpenInBrowser
                   title="View on Midday"
                   url={`https://app.midday.ai/transactions?transactionId=${tx.id}`}

@@ -24,6 +24,7 @@ export const middayOAuth = new OAuthService({
   onAuthorize({ token }) {
     globalToken = token
     midday = new Midday({
+      serverURL: 'https://api-staging.midday.ai',
       security: {
         token,
       },

@@ -5,6 +5,15 @@ import { queryKeys } from './api/queries'
 import { useNavigation } from '@raycast/api'
 import TrackerEntries from './tracker-entries'
 import { withMiddayClient } from './lib/with-midday-client'
+import { isSameDay } from 'date-fns'
+
+const getDates = (start: Date, stop: Date) => {
+  if (isSameDay(start, stop)) {
+    return [start.toISOString().split('T')[0]]
+  } else {
+    return [start.toISOString().split('T')[0], stop.toISOString().split('T')[0]]
+  }
+}
 
 type Props = {
   projectId: string
@@ -38,9 +47,6 @@ const CreateTrackerEntry = ({ projectId, initialValues }: Props) => {
           stop: values.stop,
           description: values.description,
           projectId,
-          dates: [],
-          assignedId: '',
-          duration: values.stop.getTime() / 1000 - values.start.getTime() / 1000,
         })
       }}
       ctaText="Create Tracking Entry"

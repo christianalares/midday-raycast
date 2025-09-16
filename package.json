@@ -12,6 +12,13 @@
   "license": "MIT",
   "commands": [
     {
+      "name": "menu-bar",
+      "title": "Menu Bar",
+      "subtitle": "Midday",
+      "description": "Midday",
+      "mode": "menu-bar"
+    },
+    {
       "name": "search",
       "title": "Search",
       "description": "Search your transactions and invoices",
