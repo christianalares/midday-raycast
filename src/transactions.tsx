@@ -13,8 +13,6 @@ type Props = {
 }
 
 function TransactionsComponent({ selectedId, showInitialDetails }: Props) {
-  console.log({ selectedId, showInitialDetails })
-
   const [query, setQuery] = useState<string | undefined>(undefined)
   const { data, isLoading, error } = useQuery(queryKeys.transactions.list(query))
 

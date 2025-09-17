@@ -7,11 +7,8 @@ let queryClient: QueryClient | null = null
 
 export function getQueryClient(): QueryClient {
   if (queryClient) {
-    console.log('✅ QueryClient: Returning cached instance')
     return queryClient
   }
-
-  console.log('🔄 QueryClient: Creating new instance with automatic Raycast Cache integration')
 
   queryClient = new QueryClient({
     mutationCache: new MutationCache({
