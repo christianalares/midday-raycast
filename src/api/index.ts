@@ -252,13 +252,14 @@ export type CreateTrackerEntryArgs = NonNullable<
 >
 
 const createTrackerEntry = async (args: Omit<CreateTrackerEntryArgs, 'dates' | 'assignedId' | 'duration'>) => {
+  console.log(JSON.stringify(args, null, 2))
+
   const midday = getMiddayClient()
 
   const createdTrackerEntry = await tryCatch(
     midday.trackerEntries.create({
       ...args,
       dates: [args.start.toISOString().split('T')[0]],
-      assignedId: null,
       duration: args.stop.getTime() / 1000 - args.start.getTime() / 1000,
     }),
   )

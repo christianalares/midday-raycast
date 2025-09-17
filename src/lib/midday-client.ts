@@ -13,7 +13,7 @@ export function getMiddayClient(): Midday {
       oauth2: token,
     },
     // Add any other Midday SDK configuration here
-    serverURL: 'https://api.midday.ai', // Use when available
+    // serverURL: 'https://api.midday.ai', // Use when available
   })
 }
 

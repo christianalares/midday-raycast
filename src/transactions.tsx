@@ -1,11 +1,10 @@
 import { Action, ActionPanel, Color, Icon, List } from '@raycast/api'
-
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { queryKeys } from './api/queries'
+import { TransactionDetails } from './components/transaction-details'
 import { formatCurrency } from './lib/utils'
 import { withMiddayClient } from './lib/with-midday-client'
-import { TransactionDetails } from './components/transaction-details'
 
 type Props = {
   selectedId?: string
