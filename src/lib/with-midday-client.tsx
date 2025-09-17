@@ -17,7 +17,7 @@ export function withMiddayClient<T extends Record<string, any>>(
     )
   })
 
-  // Preserve the component's display name for debugging
+  // Preserve the component's display name
   WrappedComponent.displayName = `withMiddayClient(${Component.displayName || Component.name || 'Component'})`
 
   return WrappedComponent as React.ComponentType<T>

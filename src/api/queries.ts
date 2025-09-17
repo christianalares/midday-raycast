@@ -1,5 +1,5 @@
-import { api, GetTrackerEntriesArgs, type GetDocumentsArgs } from '.'
 import { queryOptions, type QueryOptions } from '@tanstack/react-query'
+import { api, GetTrackerEntriesArgs, type GetDocumentsArgs } from '.'
 
 export const queryKeys = {
   globalSearch: (q?: string) => {

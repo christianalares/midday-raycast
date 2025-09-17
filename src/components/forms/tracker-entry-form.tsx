@@ -40,7 +40,9 @@ export const TrackerEntryForm = ({ onSubmit, initialValues, ctaText, isLoading }
         </ActionPanel>
       }
     >
+      {/* @ts-ignore */}
       <Form.DatePicker title="Start" {...form.itemProps.start} />
+      {/* @ts-ignore */}
       <Form.DatePicker title="Stop" {...form.itemProps.stop} />
       <Form.TextArea title="Description" {...form.itemProps.description} />
     </Form>
