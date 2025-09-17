@@ -2,9 +2,11 @@ import { Action, ActionPanel, Color, Icon, List } from '@raycast/api'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { queryKeys } from './api/queries'
+// import TransactionDetails from './transaction-details'
 import { TransactionDetails } from './components/transaction-details'
 import { formatCurrency } from './lib/utils'
 import { withMiddayClient } from './lib/with-midday-client'
+import TransactionAttatchments from './transaction-attatchments'
 
 type Props = {
   selectedId?: string
@@ -63,6 +65,11 @@ function TransactionsComponent({ selectedId, showInitialDetails }: Props) {
                     : { source: Icon.Circle, tintColor: Color.Orange },
               },
             ]}
+            // actions={
+            //   <ActionPanel>
+            //     <Action.Push title="View Transaction" target={<TransactionDetails transactionId={tx.id} />} />
+            //   </ActionPanel>
+            // }
             detail={<TransactionDetails transactionId={tx.id} />}
             actions={
               <ActionPanel>
@@ -71,19 +78,20 @@ function TransactionsComponent({ selectedId, showInitialDetails }: Props) {
                   onAction={() => setShowDetails(!showDetails)}
                   icon={showDetails ? Icon.EyeDisabled : Icon.Eye}
                 />
-                <Action.CopyToClipboard title="Copy transaction ID" content={tx.id} icon={Icon.CopyClipboard} />
+
                 <Action.OpenInBrowser
                   title="View on Midday"
                   url={`https://app.midday.ai/transactions?transactionId=${tx.id}`}
                 />
 
-                {/* <ActionPanel.Section>
-                  <Action.OpenInBrowser
-                    title="View on Midday"
-                    url={`https://app.midday.ai/transactions?transactionId=${tx.id}`}
-                    shortcut={{ modifiers: ['cmd'], key: 'enter' }}
+                {(tx.attachments ?? []).length > 0 && (
+                  <Action.Push
+                    title="List Attatchments"
+                    icon={Icon.Document}
+                    shortcut={{ modifiers: ['cmd'], key: 'f' }}
+                    target={<TransactionAttatchments transactionId={tx.id} />}
                   />
-                </ActionPanel.Section> */}
+                )}
               </ActionPanel>
             }
           />

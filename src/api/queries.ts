@@ -1,5 +1,5 @@
 import { queryOptions, type QueryOptions } from '@tanstack/react-query'
-import { api, GetTrackerEntriesArgs, type GetDocumentsArgs } from '.'
+import { api, GetPreSignedTransactionAttachmentUrlArgs, GetTrackerEntriesArgs, type GetDocumentsArgs } from '.'
 
 export const queryKeys = {
   globalSearch: (q?: string) => {
@@ -57,6 +57,12 @@ export const queryKeys = {
       return queryOptions({
         queryKey: ['transactions', id],
         queryFn: () => api.getTransactionById(id),
+      })
+    },
+    getAttachmentPreSignedUrl: (args: GetPreSignedTransactionAttachmentUrlArgs) => {
+      return queryOptions({
+        queryKey: ['transactions', args.transactionId, 'pre-signed-attachment-url', args.attachmentId],
+        queryFn: () => api.getPreSignedTransactionAttachmentUrl(args),
       })
     },
   },

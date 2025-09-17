@@ -267,6 +267,25 @@ const createTrackerEntry = async (args: Omit<CreateTrackerEntryArgs, 'dates' | '
   return createdTrackerEntry
 }
 
+export type GetPreSignedTransactionAttachmentUrlArgs = NonNullable<
+  Parameters<ReturnType<typeof getMiddayClient>['transactions']['getAttachmentPreSignedUrl']>[0]
+>
+
+const getPreSignedTransactionAttachmentUrl = async (
+  args: Omit<GetPreSignedTransactionAttachmentUrlArgs, 'download'>,
+) => {
+  const midday = getMiddayClient()
+
+  const preSignedTransactionAttachmentUrl = await tryCatch(
+    midday.transactions.getAttachmentPreSignedUrl({
+      ...args,
+      download: false,
+    }),
+  )
+
+  return preSignedTransactionAttachmentUrl
+}
+
 export const api = {
   getTransactions,
   getTransactionById,
@@ -283,4 +302,5 @@ export const api = {
   stopTrackerTimer,
   getTrackerEntries,
   createTrackerEntry,
+  getPreSignedTransactionAttachmentUrl,
 }
