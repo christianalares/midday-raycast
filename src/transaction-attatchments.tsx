@@ -1,34 +1,48 @@
-import { Action, ActionPanel, Color, Detail, Icon, List } from '@raycast/api'
-import { withMiddayClient } from './lib/with-midday-client'
-import { queryKeys } from './api/queries'
+import { Action, ActionPanel, Icon, List, open } from '@raycast/api'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { formatCurrency } from './lib/utils'
-import { api } from './api'
 import { useState } from 'react'
+import { queryKeys } from './api/queries'
+import { withMiddayClient } from './lib/with-midday-client'
+import { downloadFileToTempDir, savePdf } from './lib/utils'
+import { api } from './api'
 
 type Props = {
   transactionId: string
 }
 
 const TransactionAttatchments = ({ transactionId }: Props) => {
-  const [selectedAttachmentId, setSelectedAttachmentId] = useState<string | null>(null)
-
-  console.log('selectedAttachmentId', selectedAttachmentId)
-
   const { data: transaction, isLoading } = useQuery(queryKeys.transactions.getById(transactionId))
 
-  const { data: attatchment, isLoading: isLoadingAttachment } = useQuery({
-    ...queryKeys.transactions.getAttachmentPreSignedUrl({
-      // Empty string is just for type safety, the query will be disabled if selectedAttachmentId is null
-      transactionId,
-      attachmentId: selectedAttachmentId ?? '',
-    }),
-    enabled: !!selectedAttachmentId,
+  const downloadFileToTempDirMutation = useMutation({
+    mutationFn: downloadFileToTempDir,
+    meta: {
+      toastTitle: {
+        loading: 'Downloading attachment...',
+        success: '✅ Attachment downloaded',
+        error: '❌ Failed to download attachment',
+      },
+    },
+    onSuccess: (data) => {
+      console.log('downloadFileToTempDir - DATA', data)
+    },
   })
 
-  // const getPreSignedTransactionAttachmentUrlMutation = useMutation({
-  //   mutationFn: api.getPreSignedTransactionAttachmentUrl,
-  // })
+  const getPreSignedTransactionAttachmentUrlMutation = useMutation({
+    mutationFn: api.getPreSignedTransactionAttachmentUrl,
+    meta: {
+      toastTitle: {
+        loading: 'Getting pre-signed attachment URL...',
+        success: '✅ Pre-signed attachment URL received',
+        error: '❌ Failed to get pre-signed attachment URL',
+      },
+    },
+    onSuccess: (data) => {
+      console.log('api.getPreSignedTransactionAttachmentUrl - DATA', data)
+    },
+  })
+
+  const isDownloading =
+    downloadFileToTempDirMutation.isPending || getPreSignedTransactionAttachmentUrlMutation.isPending
 
   if (!transaction) {
     return null
@@ -37,37 +51,72 @@ const TransactionAttatchments = ({ transactionId }: Props) => {
   const attachments = transaction.attachments ?? []
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search attachments" onSelectionChange={setSelectedAttachmentId}>
+    <List
+      isLoading={isLoading || isDownloading}
+      searchBarPlaceholder="Search attachments"
+      // onSelectionChange={setSelectedAttachmentId}
+    >
       {attachments.map((attachment) => (
         <List.Item
           id={attachment.id}
           key={attachment.id}
           title={attachment.filename ?? attachment.path.at(-1) ?? attachment.id}
-          // quickLook={
-          //   attatchment
-          //     ? {
-          //         path: attatchment.url.replace('&download=', ''),
-          //         name: attachment.filename,
-          //       }
-          //     : undefined
-          // }
           actions={
-            attatchment && (
-              <ActionPanel>
-                <Action.OpenInBrowser
-                  title="View Attachment"
-                  icon={Icon.Eye}
-                  url={attatchment.url.replace('&download=', '')}
-                />
-                <Action.OpenInBrowser title="Download Attachment" icon={Icon.Download} url={attatchment.url} />
-                <Action.CopyToClipboard title="Copy Attachment URL" icon={Icon.Clipboard} content={attatchment.url} />
-              </ActionPanel>
-            )
-            // attatchment ? (
-            //   <ActionPanel>
-            //     <Action.ToggleQuickLook title="Preview Attachment" icon={Icon.Eye} />
-            //   </ActionPanel>
-            // ) : undefined
+            <ActionPanel>
+              <Action
+                title="View Attachment"
+                icon={Icon.Eye}
+                onAction={async () => {
+                  getPreSignedTransactionAttachmentUrlMutation.mutate(
+                    {
+                      transactionId,
+                      attachmentId: attachment.id,
+                    },
+                    {
+                      onSuccess: (preSignedData) => {
+                        downloadFileToTempDirMutation.mutate(
+                          {
+                            url: preSignedData.url,
+                            fileName: preSignedData.fileName ?? `${Date.now().toString()}.pdf`,
+                          },
+                          {
+                            onSuccess: (downloadedData) => {
+                              open(downloadedData.path)
+                            },
+                          },
+                        )
+                      },
+                    },
+                  )
+                }}
+              />
+              <Action
+                title="Save Attachment"
+                icon={Icon.Download}
+                onAction={() => {
+                  getPreSignedTransactionAttachmentUrlMutation.mutate(
+                    {
+                      transactionId,
+                      attachmentId: attachment.id,
+                    },
+                    {
+                      onSuccess: (preSignedData) => {
+                        savePdf({
+                          url: preSignedData.url,
+                          fileName: preSignedData.fileName ?? `${Date.now().toString()}.pdf`,
+                        })
+                      },
+                    },
+                  )
+                }}
+              />
+              {/* <Action.OpenInBrowser title="Download Attachment" icon={Icon.Download} url={attatchmentData.url} /> */}
+              {/* <Action.CopyToClipboard
+                  title="Copy Attachment URL"
+                  icon={Icon.Clipboard}
+                  content={attatchmentData.url}
+                /> */}
+            </ActionPanel>
           }
         />
       ))}
