@@ -194,6 +194,14 @@ const updateCustomer = async (args: UpdateCustomerArgs) => {
   return updatedCustomer
 }
 
+const getTimerStatus = async () => {
+  const midday = getMiddayClient()
+
+  const timerStatus = await tryCatch(midday.trackerTimer.getTimerStatus({}))
+
+  return timerStatus
+}
+
 const getTrackerProjects = async () => {
   const midday = getMiddayClient()
 
@@ -303,4 +311,5 @@ export const api = {
   getTrackerEntries,
   createTrackerEntry,
   getPreSignedTransactionAttachmentUrl,
+  getTimerStatus,
 }

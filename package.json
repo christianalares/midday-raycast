@@ -17,7 +17,7 @@
       "subtitle": "Midday",
       "description": "Midday",
       "mode": "menu-bar",
-      "interval": "60s"
+      "interval": "30s"
     },
     {
       "name": "search",

@@ -1,18 +1,40 @@
-import { Action, Color, Icon, type Keyboard, LaunchType, MenuBarExtra, launchCommand, open } from '@raycast/api'
+import { Action, Color, Icon, Image, type Keyboard, LaunchType, MenuBarExtra, launchCommand, open } from '@raycast/api'
 import { useQuery } from '@tanstack/react-query'
 import { queryKeys } from './api/queries'
-import { formatCurrency } from './lib/utils'
+import { formatCurrency, formatTimerDuration } from './lib/utils'
 import { withMiddayClient } from './lib/with-midday-client'
+import { useEffect, useState } from 'react'
+import { useTrackingTimer } from './hooks/use-tracking-timer'
 
 function MenuBar() {
+  const { getFromCache } = useTrackingTimer()
+  // const { data: timerStatusData, isLoading: isLoadingTimerStatus } = useQuery(queryKeys.trackerTimer.status())
   const { data: transactionsData, isLoading: isLoadingTransactions } = useQuery(queryKeys.transactions.list())
   const { data: trackerProjectsData, isLoading: isLoadingTrackerProjects } = useQuery(queryKeys.trackerProjects.list())
 
   const transactions = (transactionsData ?? []).slice(0, 9)
   const trackerProjects = (trackerProjectsData ?? []).slice(0, 9)
 
+  const elapsedTimer = getFromCache()
+
+  // console.log(elapsedTimer)
+
+  // const isTimerRunning = timerStatusData?.data.isRunning && timerStatusData.data.elapsedTime > 0
+
   return (
-    <MenuBarExtra icon="https://app.midday.ai/favicon.ico" tooltip="Midday">
+    <MenuBarExtra
+      icon={{
+        source: 'midday-light.svg',
+        tintColor: {
+          light: elapsedTimer ? '#e65247' : '#000000',
+          dark: elapsedTimer ? '#e65247' : '#FFFFFF',
+          adjustContrast: true,
+        },
+      }}
+      tooltip="Midday"
+      isLoading={isLoadingTransactions || isLoadingTrackerProjects}
+      title={elapsedTimer ? formatTimerDuration(elapsedTimer) : undefined}
+    >
       <MenuBarExtra.Section title="Latest Transactions">
         {isLoadingTransactions ? (
           <MenuBarExtra.Item title="Loading Transactions..." />
@@ -37,7 +59,7 @@ function MenuBar() {
                   subtitle={formatCurrency(tx.amount, tx.currency)}
                   icon={Icon.ArrowNe}
                   onAction={() => {
-                    open('https://app.midday.ai/transactions?transactionId=' + tx.id)
+                    open(`https://app.midday.ai/transactions?transactionId=${tx.id}`)
                   }}
                 />
               }

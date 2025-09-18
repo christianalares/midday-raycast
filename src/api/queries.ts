@@ -46,6 +46,14 @@ export const queryKeys = {
       })
     },
   },
+  trackerTimer: {
+    status: () => {
+      return queryOptions({
+        queryKey: ['tracker-timer', 'status'],
+        queryFn: () => api.getTimerStatus(),
+      })
+    },
+  },
   transactions: {
     list: (q?: string) => {
       return queryOptions({
