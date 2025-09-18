@@ -1,19 +1,10 @@
+import { useNavigation } from '@raycast/api'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { type TrackerEntry, TrackerEntryForm } from './components/forms/tracker-entry-form'
 import { api } from './api'
 import { queryKeys } from './api/queries'
-import { useNavigation } from '@raycast/api'
-import TrackerEntries from './tracker-entries'
+import { type TrackerEntry, TrackerEntryForm } from './components/forms/tracker-entry-form'
 import { withMiddayClient } from './lib/with-midday-client'
-import { isSameDay } from 'date-fns'
-
-const getDates = (start: Date, stop: Date) => {
-  if (isSameDay(start, stop)) {
-    return [start.toISOString().split('T')[0]]
-  } else {
-    return [start.toISOString().split('T')[0], stop.toISOString().split('T')[0]]
-  }
-}
+import TrackerEntries from './tracker-entries'
 
 type Props = {
   projectId: string

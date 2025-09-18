@@ -2,7 +2,6 @@ import { Action, ActionPanel, Color, Icon, List } from '@raycast/api'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { queryKeys } from './api/queries'
-// import TransactionDetails from './transaction-details'
 import { TransactionDetails } from './components/transaction-details'
 import { formatCurrency } from './lib/utils'
 import { withMiddayClient } from './lib/with-midday-client'
@@ -13,9 +12,9 @@ type Props = {
   showInitialDetails?: boolean
 }
 
-function TransactionsComponent({ selectedId, showInitialDetails }: Props) {
+function Transactions({ selectedId, showInitialDetails }: Props) {
   const [query, setQuery] = useState<string | undefined>(undefined)
-  const { data, isLoading, error } = useQuery(queryKeys.transactions.list(query))
+  const { data, isLoading, error } = useQuery(queryKeys.transactions.list({ q: query }))
 
   const transactions = data ?? []
 
@@ -101,4 +100,4 @@ function TransactionsComponent({ selectedId, showInitialDetails }: Props) {
   )
 }
 
-export default withMiddayClient(TransactionsComponent)
+export default withMiddayClient(Transactions)

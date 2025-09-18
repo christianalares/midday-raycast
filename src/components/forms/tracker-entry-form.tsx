@@ -1,6 +1,6 @@
 import { Form, Action, ActionPanel } from '@raycast/api'
 import { FormValidation, useForm } from '@raycast/utils'
-import { cleanFormProps } from '../../lib/utils'
+// import { cleanFormProps } from '../../lib/utils'
 import { addHours, startOfHour } from 'date-fns'
 
 export type TrackerEntry = {
@@ -40,9 +40,9 @@ export const TrackerEntryForm = ({ onSubmit, initialValues, ctaText, isLoading }
         </ActionPanel>
       }
     >
-      {/* @ts-ignore */}
+      {/* @ts-expect-error todo */}
       <Form.DatePicker title="Start" {...form.itemProps.start} />
-      {/* @ts-ignore */}
+      {/* @ts-expect-error todo */}
       <Form.DatePicker title="Stop" {...form.itemProps.stop} />
       <Form.TextArea title="Description" {...form.itemProps.description} />
     </Form>

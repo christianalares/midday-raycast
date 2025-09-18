@@ -1,13 +1,11 @@
 import { Action, ActionPanel, captureException, Icon, List, showInFinder } from '@raycast/api'
-import { runAppleScript } from '@raycast/utils'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { useState } from 'react'
-import path from 'path'
-import { queryKeys } from './api/queries'
-import { withMiddayClient } from './lib/with-midday-client'
-import { downloadFile, formatSize, quickLookFile, promptForPath } from './lib/utils'
-import { api } from './api'
 import os from 'os'
+import path from 'path'
+import { api } from './api'
+import { queryKeys } from './api/queries'
+import { downloadFile, formatSize, promptForPath, quickLookFile } from './lib/utils'
+import { withMiddayClient } from './lib/with-midday-client'
 
 const getIconByMimeType = (mimeType: string) => {
   if (mimeType.startsWith('image/')) {

@@ -1,6 +1,7 @@
 import { Color, Icon, type Keyboard, LaunchType, MenuBarExtra, launchCommand, open } from '@raycast/api'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
+import { api } from './api'
 import { queryKeys } from './api/queries'
 import {
   clearCurrentInterval,
@@ -11,9 +12,15 @@ import {
 } from './lib/interval'
 import { formatCurrency, formatTimerDuration } from './lib/utils'
 import { withMiddayClient } from './lib/with-midday-client'
-import { api } from './api'
 
 function MenuBar() {
+  const { data: transactionsData, isLoading: isLoadingTransactions } = useQuery(
+    queryKeys.transactions.list({
+      pageSize: 9,
+    }),
+  )
+  const { data: trackerProjectsData, isLoading: isLoadingTrackerProjects } = useQuery(queryKeys.trackerProjects.list())
+
   const checkTimerMutation = useMutation({
     mutationFn: api.getTimerStatus,
     onSuccess: ({ data }) => {
@@ -45,8 +52,6 @@ function MenuBar() {
 
       const diffInSeconds = (now.getTime() - lastCheckTimestamp.getTime()) / 1000
 
-      console.log('diffInSeconds:', diffInSeconds)
-
       // If the last check was more than 15 minutes ago, check the timer status
       if (diffInSeconds > 60 * 15 || diffInSeconds === 0) {
         checkTimerMutation.mutate(undefined, {
@@ -64,6 +69,9 @@ function MenuBar() {
 
   const currentInterval = getCurrentInterval()
 
+  const transactions = transactionsData ?? []
+  const trackerProjects = trackerProjectsData ?? []
+
   return (
     <MenuBarExtra
       icon={{
@@ -75,10 +83,10 @@ function MenuBar() {
         },
       }}
       tooltip="Midday"
-      // isLoading={isLoadingTransactions || isLoadingTrackerProjects}
+      isLoading={isLoadingTransactions || isLoadingTrackerProjects}
       title={currentInterval ? formatTimerDuration(currentInterval.elapsedTime) : undefined}
     >
-      {/* <MenuBarExtra.Section title="Latest Transactions">
+      <MenuBarExtra.Section title="Latest Transactions">
         {isLoadingTransactions ? (
           <MenuBarExtra.Item title="Loading Transactions..." />
         ) : (
@@ -131,7 +139,7 @@ function MenuBar() {
         ) : (
           trackerProjects.map((project) => <MenuBarExtra.Item key={project.id} title={project.name} />)
         )}
-      </MenuBarExtra.Section> */}
+      </MenuBarExtra.Section>
     </MenuBarExtra>
   )
 }

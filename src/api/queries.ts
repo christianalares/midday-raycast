@@ -1,5 +1,11 @@
 import { queryOptions, type QueryOptions } from '@tanstack/react-query'
-import { api, GetPreSignedTransactionAttachmentUrlArgs, GetTrackerEntriesArgs, type GetDocumentsArgs } from '.'
+import {
+  api,
+  type GetPreSignedTransactionAttachmentUrlArgs,
+  type GetTrackerEntriesArgs,
+  type GetTransactionsArgs,
+  type GetDocumentsArgs,
+} from '.'
 
 export const queryKeys = {
   globalSearch: (q?: string) => {
@@ -55,10 +61,10 @@ export const queryKeys = {
     },
   },
   transactions: {
-    list: (q?: string) => {
+    list: (args: GetTransactionsArgs) => {
       return queryOptions({
-        queryKey: ['transactions', q],
-        queryFn: () => api.getTransactions(q),
+        queryKey: ['transactions', args],
+        queryFn: () => api.getTransactions(args),
       })
     },
     getById: (id: string) => {

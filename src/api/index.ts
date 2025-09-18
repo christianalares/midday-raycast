@@ -21,14 +21,14 @@ const tryCatch = async <T>(promise: Promise<T>): Promise<T> => {
   }
 }
 
-const getTransactions = async (query?: string) => {
-  console.log('Getting transactions')
+export type GetTransactionsArgs = NonNullable<Parameters<ReturnType<typeof getMiddayClient>['transactions']['list']>[0]>
+
+const getTransactions = async (args: GetTransactionsArgs) => {
   const midday = getMiddayClient()
 
   const transactions = await tryCatch(
     midday.transactions.list({
-      pageSize: 100,
-      q: query,
+      ...args,
     }),
   )
 
@@ -198,15 +198,12 @@ const updateCustomer = async (args: UpdateCustomerArgs) => {
 const getTimerStatus = async () => {
   const midday = getMiddayClient()
 
-  console.log(1)
   const timerStatus = await tryCatch(midday.trackerTimer.getTimerStatus({}))
-  console.log(2)
 
   return timerStatus
 }
 
 const getTrackerProjects = async () => {
-  console.log('Getting tracker projects')
   const midday = getMiddayClient()
 
   const trackerProjects = await tryCatch(midday.trackerProjects.list({}))
@@ -264,8 +261,6 @@ export type CreateTrackerEntryArgs = NonNullable<
 >
 
 const createTrackerEntry = async (args: Omit<CreateTrackerEntryArgs, 'dates' | 'assignedId' | 'duration'>) => {
-  console.log(JSON.stringify(args, null, 2))
-
   const midday = getMiddayClient()
 
   const createdTrackerEntry = await tryCatch(

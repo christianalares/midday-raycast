@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { queryKeys, type QueryResults } from './api/queries'
 import CreateCustomer from './create-customer'
 import { withMiddayClient } from './lib/with-midday-client'
-import TransactionsComponent from './transactions'
+import Transactions from './transactions'
 import { api } from './api'
 import { useToggleState } from './hooks/use-toggle-state'
 import { formatSize, getCountryByCode } from './lib/utils'
@@ -297,7 +297,7 @@ const TransactionsList = ({
         }}
         actions={
           <ActionPanel>
-            <Action.Push title="View all Transactions" target={<TransactionsComponent />} />
+            <Action.Push title="View all Transactions" target={<Transactions />} />
           </ActionPanel>
         }
       />
