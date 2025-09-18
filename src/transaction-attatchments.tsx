@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, showInFinder } from '@raycast/api'
+import { Action, ActionPanel, captureException, Icon, List, showInFinder } from '@raycast/api'
 import { runAppleScript } from '@raycast/utils'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
@@ -74,6 +74,37 @@ const TransactionAttatchments = ({ transactionId }: Props) => {
           actions={
             <ActionPanel>
               <Action
+                title="Download Attachment"
+                icon={Icon.Download}
+                onAction={() => {
+                  getPreSignedTransactionAttachmentUrlMutation.mutate(
+                    {
+                      transactionId,
+                      attachmentId: attachment.id,
+                    },
+                    {
+                      onSuccess: async (preSignedData) => {
+                        try {
+                          const fileName = preSignedData.fileName ?? `${Date.now().toString()}.pdf`
+                          const filePath = await promptForPath(fileName)
+
+                          const { path: downloadedPath } = await downloadFile({
+                            url: preSignedData.url,
+                            path: filePath,
+                          })
+
+                          showInFinder(downloadedPath)
+                        } catch (error) {
+                          console.error('Failed to download attachment:', error)
+                          captureException(error)
+                        }
+                      },
+                    },
+                  )
+                }}
+              />
+
+              <Action
                 title="Preview Attachment"
                 shortcut={{ modifiers: ['cmd'], key: 'y' }}
                 icon={Icon.Eye}
@@ -104,41 +135,6 @@ const TransactionAttatchments = ({ transactionId }: Props) => {
                   )
                 }}
               />
-              <Action
-                title="Save Attachment"
-                icon={Icon.Download}
-                onAction={() => {
-                  getPreSignedTransactionAttachmentUrlMutation.mutate(
-                    {
-                      transactionId,
-                      attachmentId: attachment.id,
-                    },
-                    {
-                      onSuccess: async (preSignedData) => {
-                        try {
-                          const fileName = preSignedData.fileName ?? `${Date.now().toString()}.pdf`
-                          const filePath = await promptForPath(fileName)
-
-                          const { path: downloadedPath } = await downloadFile({
-                            url: preSignedData.url,
-                            path: filePath,
-                          })
-
-                          showInFinder(downloadedPath)
-                        } catch (error) {
-                          console.error('Failed to save attachment:', error)
-                        }
-                      },
-                    },
-                  )
-                }}
-              />
-              {/* <Action.OpenInBrowser title="Download Attachment" icon={Icon.Download} url={attatchmentData.url} /> */}
-              {/* <Action.CopyToClipboard
-                  title="Copy Attachment URL"
-                  icon={Icon.Clipboard}
-                  content={attatchmentData.url}
-                /> */}
             </ActionPanel>
           }
         />
