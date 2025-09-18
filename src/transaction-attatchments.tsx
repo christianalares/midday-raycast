@@ -1,10 +1,25 @@
-import { Action, ActionPanel, Icon, List, open } from '@raycast/api'
+import { Action, ActionPanel, Icon, List, showInFinder } from '@raycast/api'
+import { runAppleScript } from '@raycast/utils'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
+import path from 'path'
 import { queryKeys } from './api/queries'
 import { withMiddayClient } from './lib/with-midday-client'
-import { downloadFileToTempDir, savePdf } from './lib/utils'
+import { downloadFile, formatSize, quickLookFile, promptForPath } from './lib/utils'
 import { api } from './api'
+import os from 'os'
+
+const getIconByMimeType = (mimeType: string) => {
+  if (mimeType.startsWith('image/')) {
+    return Icon.Image
+  }
+
+  if (mimeType === 'application/pdf') {
+    return Icon.Document
+  }
+
+  return Icon.Document
+}
 
 type Props = {
   transactionId: string
@@ -13,8 +28,8 @@ type Props = {
 const TransactionAttatchments = ({ transactionId }: Props) => {
   const { data: transaction, isLoading } = useQuery(queryKeys.transactions.getById(transactionId))
 
-  const downloadFileToTempDirMutation = useMutation({
-    mutationFn: downloadFileToTempDir,
+  const downloadFileMutation = useMutation({
+    mutationFn: downloadFile,
     meta: {
       toastTitle: {
         loading: 'Downloading attachment...',
@@ -22,27 +37,20 @@ const TransactionAttatchments = ({ transactionId }: Props) => {
         error: '❌ Failed to download attachment',
       },
     },
-    onSuccess: (data) => {
-      console.log('downloadFileToTempDir - DATA', data)
-    },
   })
 
   const getPreSignedTransactionAttachmentUrlMutation = useMutation({
     mutationFn: api.getPreSignedTransactionAttachmentUrl,
     meta: {
       toastTitle: {
-        loading: 'Getting pre-signed attachment URL...',
-        success: '✅ Pre-signed attachment URL received',
-        error: '❌ Failed to get pre-signed attachment URL',
+        loading: 'Getting attachment URL...',
+        success: '✅ Attachment URL received',
+        error: '❌ Failed to get attachment URL',
       },
-    },
-    onSuccess: (data) => {
-      console.log('api.getPreSignedTransactionAttachmentUrl - DATA', data)
     },
   })
 
-  const isDownloading =
-    downloadFileToTempDirMutation.isPending || getPreSignedTransactionAttachmentUrlMutation.isPending
+  const isDownloading = downloadFileMutation.isPending || getPreSignedTransactionAttachmentUrlMutation.isPending
 
   if (!transaction) {
     return null
@@ -51,20 +59,23 @@ const TransactionAttatchments = ({ transactionId }: Props) => {
   const attachments = transaction.attachments ?? []
 
   return (
-    <List
-      isLoading={isLoading || isDownloading}
-      searchBarPlaceholder="Search attachments"
-      // onSelectionChange={setSelectedAttachmentId}
-    >
+    <List isLoading={isLoading || isDownloading} searchBarPlaceholder="Search attachments">
       {attachments.map((attachment) => (
         <List.Item
           id={attachment.id}
           key={attachment.id}
           title={attachment.filename ?? attachment.path.at(-1) ?? attachment.id}
+          icon={getIconByMimeType(attachment.type)}
+          accessories={[
+            {
+              text: formatSize(attachment.size),
+            },
+          ]}
           actions={
             <ActionPanel>
               <Action
-                title="View Attachment"
+                title="Preview Attachment"
+                shortcut={{ modifiers: ['cmd'], key: 'y' }}
                 icon={Icon.Eye}
                 onAction={async () => {
                   getPreSignedTransactionAttachmentUrlMutation.mutate(
@@ -74,14 +85,17 @@ const TransactionAttatchments = ({ transactionId }: Props) => {
                     },
                     {
                       onSuccess: (preSignedData) => {
-                        downloadFileToTempDirMutation.mutate(
+                        const tempFileName = `${new Date().toISOString()}__${preSignedData.fileName ?? `${Date.now().toString()}.pdf`}`
+                        const tempPath = path.join(os.tmpdir(), tempFileName)
+
+                        downloadFileMutation.mutate(
                           {
                             url: preSignedData.url,
-                            fileName: preSignedData.fileName ?? `${Date.now().toString()}.pdf`,
+                            path: tempPath,
                           },
                           {
-                            onSuccess: (downloadedData) => {
-                              open(downloadedData.path)
+                            onSuccess: async (downloadedData) => {
+                              await quickLookFile(downloadedData.path)
                             },
                           },
                         )
@@ -100,11 +114,20 @@ const TransactionAttatchments = ({ transactionId }: Props) => {
                       attachmentId: attachment.id,
                     },
                     {
-                      onSuccess: (preSignedData) => {
-                        savePdf({
-                          url: preSignedData.url,
-                          fileName: preSignedData.fileName ?? `${Date.now().toString()}.pdf`,
-                        })
+                      onSuccess: async (preSignedData) => {
+                        try {
+                          const fileName = preSignedData.fileName ?? `${Date.now().toString()}.pdf`
+                          const filePath = await promptForPath(fileName)
+
+                          const { path: downloadedPath } = await downloadFile({
+                            url: preSignedData.url,
+                            path: filePath,
+                          })
+
+                          showInFinder(downloadedPath)
+                        } catch (error) {
+                          console.error('Failed to save attachment:', error)
+                        }
                       },
                     },
                   )

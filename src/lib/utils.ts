@@ -1,8 +1,6 @@
 import { formatDuration } from 'date-fns'
 import { countries } from './countries'
-import { showHUD, type Form } from '@raycast/api'
-import { tmpdir } from 'os'
-import path from 'path'
+import { type Form } from '@raycast/api'
 import { promises as fs } from 'fs'
 import { runAppleScript } from '@raycast/utils'
 
@@ -72,7 +70,21 @@ export const formatSize = (bytes: number) => {
   }).format(+Math.round(bytes / 1024 ** unitIndex))
 }
 
-export const downloadFileToTempDir = async ({ url, fileName }: { url: string; fileName: string }) => {
+export const promptForPath = async (defaultFileName: string) => {
+  const filePath = await runAppleScript(
+    `
+    set defaultFile to choose file name with prompt "Save attachment as:" default name "${defaultFileName}"
+    return POSIX path of defaultFile
+  `,
+    {
+      timeout: 30000,
+    },
+  )
+
+  return filePath.trim()
+}
+
+export const downloadFile = async ({ url, path: filePath }: { url: string; path: string }) => {
   const response = await fetch(url)
 
   if (!response.ok) {
@@ -80,31 +92,21 @@ export const downloadFileToTempDir = async ({ url, fileName }: { url: string; fi
   }
 
   const buffer = await response.arrayBuffer()
+  await fs.writeFile(filePath, Buffer.from(buffer))
 
-  const tempDir = tmpdir()
-
-  const tempFileName = `${new Date().toISOString()}__${fileName}`
-  const tempPath = path.join(tempDir, tempFileName)
-
-  await fs.writeFile(tempPath, Buffer.from(buffer))
-
-  return { path: tempPath, fileName: tempFileName }
+  return { path: filePath }
 }
 
-export const savePdf = async ({ url, fileName }: { url: string; fileName: string }) => {
-  try {
-    await showHUD('Please select a location to save the image...')
-
-    await runAppleScript(`
-      set outputFolder to choose folder with prompt "Please select an output folder:"
-      set temp_folder to (POSIX path of outputFolder) & "${fileName}.pdf"
-      set q_temp_folder to quoted form of temp_folder
-
-      set cmd to "curl -o " & q_temp_folder & " " & "${url}"
-        do shell script cmd
-    `)
-  } catch (err) {
-    console.error(err)
-    await showHUD("Couldn't save the image...")
-  }
+export const quickLookFile = async (path: string) => {
+  await runAppleScript(`
+    try
+      do shell script "qlmanage -p " & quoted form of "${path}"
+    on error
+      -- Fallback: reveal in Finder if Quick Look fails
+      tell application "Finder"
+        reveal POSIX file "${path}" as alias
+        activate
+      end tell
+    end try
+  `)
 }
