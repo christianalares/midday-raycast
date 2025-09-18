@@ -1,5 +1,5 @@
 import { captureException, showToast, Toast } from '@raycast/api'
-import { MutationCache, QueryClient } from '@tanstack/react-query'
+import { MutationCache, QueryCache, QueryClient } from '@tanstack/react-query'
 import '../types/query' // Import to register the meta types
 
 // Singleton QueryClient instance
@@ -11,6 +11,18 @@ export function getQueryClient(): QueryClient {
   }
 
   queryClient = new QueryClient({
+    queryCache: new QueryCache({
+      onError: async (error) => {
+        const title = error.name ?? '❌ Error'
+
+        captureException(error)
+        await showToast({
+          style: Toast.Style.Failure,
+          title,
+          message: error.message ?? undefined,
+        })
+      },
+    }),
     mutationCache: new MutationCache({
       onMutate: async (variables, mutation) => {
         const title = mutation.meta?.toastTitle?.loading || '⏳ Processing...'
@@ -35,6 +47,7 @@ export function getQueryClient(): QueryClient {
         await showToast({
           style: Toast.Style.Failure,
           title,
+          message: error.message ?? undefined,
         })
       },
     }),

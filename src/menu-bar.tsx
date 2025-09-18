@@ -133,13 +133,15 @@ function MenuBar() {
         )}
       </MenuBarExtra.Section>
 
-      <MenuBarExtra.Section title="Tracker">
-        {isLoadingTrackerProjects ? (
-          <MenuBarExtra.Item title="Loading Tracker Projects..." />
-        ) : (
-          trackerProjects.map((project) => <MenuBarExtra.Item key={project.id} title={project.name} />)
-        )}
-      </MenuBarExtra.Section>
+      {trackerProjects.length > 0 && (
+        <MenuBarExtra.Section title="Tracker">
+          {isLoadingTrackerProjects ? (
+            <MenuBarExtra.Item title="Loading Tracker Projects..." />
+          ) : (
+            trackerProjects.map((project) => <MenuBarExtra.Item key={project.id} title={project.name} />)
+          )}
+        </MenuBarExtra.Section>
+      )}
     </MenuBarExtra>
   )
 }
