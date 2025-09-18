@@ -15,7 +15,7 @@
       "name": "menu-bar",
       "title": "Menu Bar",
       "subtitle": "Midday",
-      "description": "Midday",
+      "description": "View Midday data in the menu bar",
       "mode": "menu-bar",
       "interval": "10s"
     },
