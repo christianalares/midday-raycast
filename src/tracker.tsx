@@ -3,9 +3,10 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { api } from './api'
 import { type QueryResults, queryKeys } from './api/queries'
-import { formatCurrency, formatDurationFromSeconds, formatTimerDuration } from './lib/utils'
+import { formatCurrency, formatDurationFromSeconds, formatTimerDuration, refreshMenuBar } from './lib/utils'
 import { withMiddayClient } from './lib/with-midday-client'
 import TrackerEntries from './tracker-entries'
+import { clearCurrentInterval, setCurrentInterval } from './lib/interval'
 
 const Tracker = () => {
   const { data: trackerProjects, isLoading, error } = useQuery(queryKeys.trackerProjects.list())
@@ -62,6 +63,13 @@ const ProjectListItem = ({ project, showDetails, setShowDetails }: ProjectListIt
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.trackerProjects.list().queryKey })
+      setCurrentInterval(0)
+      refreshMenuBar()
+    },
+    // TODO: Remove this when the SDK/API is fixed, this is a workaround to to set the interval even if the endpoint fails
+    onSettled: () => {
+      setCurrentInterval(0)
+      refreshMenuBar()
     },
   })
 
@@ -76,6 +84,8 @@ const ProjectListItem = ({ project, showDetails, setShowDetails }: ProjectListIt
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.trackerProjects.list().queryKey })
+      clearCurrentInterval()
+      refreshMenuBar()
     },
   })
 

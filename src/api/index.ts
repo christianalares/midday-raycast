@@ -22,6 +22,7 @@ const tryCatch = async <T>(promise: Promise<T>): Promise<T> => {
 }
 
 const getTransactions = async (query?: string) => {
+  console.log('Getting transactions')
   const midday = getMiddayClient()
 
   const transactions = await tryCatch(
@@ -197,12 +198,15 @@ const updateCustomer = async (args: UpdateCustomerArgs) => {
 const getTimerStatus = async () => {
   const midday = getMiddayClient()
 
+  console.log(1)
   const timerStatus = await tryCatch(midday.trackerTimer.getTimerStatus({}))
+  console.log(2)
 
   return timerStatus
 }
 
 const getTrackerProjects = async () => {
+  console.log('Getting tracker projects')
   const midday = getMiddayClient()
 
   const trackerProjects = await tryCatch(midday.trackerProjects.list({}))

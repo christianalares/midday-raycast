@@ -1,6 +1,6 @@
 import { formatDuration } from 'date-fns'
 import { countries } from './countries'
-import { type Form } from '@raycast/api'
+import { launchCommand, LaunchType, type Form } from '@raycast/api'
 import { promises as fs } from 'fs'
 import { runAppleScript } from '@raycast/utils'
 
@@ -109,4 +109,11 @@ export const quickLookFile = async (path: string) => {
       end tell
     end try
   `)
+}
+
+export const refreshMenuBar = () => {
+  launchCommand({
+    name: 'menu-bar',
+    type: LaunchType.Background,
+  })
 }

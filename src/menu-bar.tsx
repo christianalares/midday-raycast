@@ -1,41 +1,84 @@
-import { Action, Color, Icon, Image, type Keyboard, LaunchType, MenuBarExtra, launchCommand, open } from '@raycast/api'
-import { useQuery } from '@tanstack/react-query'
+import { Color, Icon, type Keyboard, LaunchType, MenuBarExtra, launchCommand, open } from '@raycast/api'
+import { useMutation, useQuery } from '@tanstack/react-query'
+import { useEffect, useState } from 'react'
 import { queryKeys } from './api/queries'
+import {
+  clearCurrentInterval,
+  getCurrentInterval,
+  getLastCheckTimestamp,
+  setCurrentInterval,
+  setLastCheckTimestamp,
+} from './lib/interval'
 import { formatCurrency, formatTimerDuration } from './lib/utils'
 import { withMiddayClient } from './lib/with-midday-client'
-import { useEffect, useState } from 'react'
-import { useTrackingTimer } from './hooks/use-tracking-timer'
+import { api } from './api'
 
 function MenuBar() {
-  const { getFromCache } = useTrackingTimer()
-  // const { data: timerStatusData, isLoading: isLoadingTimerStatus } = useQuery(queryKeys.trackerTimer.status())
-  const { data: transactionsData, isLoading: isLoadingTransactions } = useQuery(queryKeys.transactions.list())
-  const { data: trackerProjectsData, isLoading: isLoadingTrackerProjects } = useQuery(queryKeys.trackerProjects.list())
+  const checkTimerMutation = useMutation({
+    mutationFn: api.getTimerStatus,
+    onSuccess: ({ data }) => {
+      if (data.isRunning) {
+        setCurrentInterval(data.elapsedTime)
+      } else {
+        clearCurrentInterval()
+      }
+    },
+  })
 
-  const transactions = (transactionsData ?? []).slice(0, 9)
-  const trackerProjects = (trackerProjectsData ?? []).slice(0, 9)
+  useEffect(() => {
+    const currentInterval = getCurrentInterval()
 
-  const elapsedTimer = getFromCache()
+    if (currentInterval) {
+      const diffSinceLastUpdateInSeconds = (new Date().getTime() - currentInterval.lastStoredCache.getTime()) / 1000
 
-  // console.log(elapsedTimer)
+      if (diffSinceLastUpdateInSeconds > 60) {
+        checkTimerMutation.mutate()
+      }
+    } else {
+      const lastCheckTimestamp = getLastCheckTimestamp()
 
-  // const isTimerRunning = timerStatusData?.data.isRunning && timerStatusData.data.elapsedTime > 0
+      if (!lastCheckTimestamp) {
+        return
+      }
+
+      const now = new Date()
+
+      const diffInSeconds = (now.getTime() - lastCheckTimestamp.getTime()) / 1000
+
+      console.log('diffInSeconds:', diffInSeconds)
+
+      // If the last check was more than 15 minutes ago, check the timer status
+      if (diffInSeconds > 60 * 15 || diffInSeconds === 0) {
+        checkTimerMutation.mutate(undefined, {
+          onSuccess: ({ data }) => {
+            if (data.isRunning) {
+              setCurrentInterval(data.elapsedTime)
+            }
+
+            setLastCheckTimestamp()
+          },
+        })
+      }
+    }
+  }, [])
+
+  const currentInterval = getCurrentInterval()
 
   return (
     <MenuBarExtra
       icon={{
         source: 'midday-light.svg',
         tintColor: {
-          light: elapsedTimer ? '#e65247' : '#000000',
-          dark: elapsedTimer ? '#e65247' : '#FFFFFF',
+          light: currentInterval ? '#e65247' : '#000000',
+          dark: currentInterval ? '#e65247' : '#FFFFFF',
           adjustContrast: true,
         },
       }}
       tooltip="Midday"
-      isLoading={isLoadingTransactions || isLoadingTrackerProjects}
-      title={elapsedTimer ? formatTimerDuration(elapsedTimer) : undefined}
+      // isLoading={isLoadingTransactions || isLoadingTrackerProjects}
+      title={currentInterval ? formatTimerDuration(currentInterval.elapsedTime) : undefined}
     >
-      <MenuBarExtra.Section title="Latest Transactions">
+      {/* <MenuBarExtra.Section title="Latest Transactions">
         {isLoadingTransactions ? (
           <MenuBarExtra.Item title="Loading Transactions..." />
         ) : (
@@ -88,7 +131,7 @@ function MenuBar() {
         ) : (
           trackerProjects.map((project) => <MenuBarExtra.Item key={project.id} title={project.name} />)
         )}
-      </MenuBarExtra.Section>
+      </MenuBarExtra.Section> */}
     </MenuBarExtra>
   )
 }
