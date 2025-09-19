@@ -38,7 +38,7 @@ const TransactionAttatchments = ({ transactionId }: Props) => {
   })
 
   const getPreSignedTransactionAttachmentUrlMutation = useMutation({
-    mutationFn: api.getPreSignedTransactionAttachmentUrl,
+    mutationFn: api.transactions.getPreSignedAttachmentUrl,
     meta: {
       toastTitle: {
         loading: 'Getting attachment URL...',

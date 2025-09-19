@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Color, Icon, List } from '@raycast/api'
 import { useQuery } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { queryKeys } from './api/queries'
 import { TransactionDetails } from './components/transaction-details'
 import { formatCurrency } from './lib/utils'
@@ -19,6 +19,14 @@ function Transactions({ selectedId, showInitialDetails }: Props) {
   const transactions = data ?? []
 
   const [showDetails, setShowDetails] = useState(showInitialDetails ?? false)
+  const [selectedTransactionId, setSelectedTransactionId] = useState<string | undefined>(undefined)
+
+  useEffect(() => {
+    if (selectedId && data) {
+      console.log(`Selected id is ${selectedId} and we have ${data.length} transactions`)
+      setSelectedTransactionId(selectedId)
+    }
+  }, [selectedId, data])
 
   return (
     <List
@@ -27,7 +35,7 @@ function Transactions({ selectedId, showInitialDetails }: Props) {
       isShowingDetail={showDetails}
       onSearchTextChange={setQuery}
       throttle={true}
-      selectedItemId={selectedId}
+      selectedItemId={selectedTransactionId}
     >
       {error && (
         <List.EmptyView

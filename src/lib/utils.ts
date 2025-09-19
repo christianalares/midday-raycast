@@ -1,14 +1,34 @@
 import { formatDuration } from 'date-fns'
 import { countries } from './countries'
-import { launchCommand, LaunchType, type Form } from '@raycast/api'
+import { captureException, launchCommand, LaunchType, type Form } from '@raycast/api'
 import { promises as fs } from 'fs'
 import { runAppleScript } from '@raycast/utils'
+
+export type Prettify<T> = {
+  [K in keyof T]: T[K]
+} & {}
 
 export const cleanFormProps = <T extends Form.ItemProps<any>>(props: T) => {
   return {
     ...props,
     value: props.value === null ? undefined : props.value,
     defaultValue: props.defaultValue === null ? undefined : props.defaultValue,
+  }
+}
+
+/**
+ * Wraps a promise with consistent error handling:
+ * - Logs errors for debugging
+ * - Captures errors for monitoring
+ * - Re-throws errors for proper TanStack Query integration
+ */
+export const tryCatch = async <T>(promise: Promise<T>): Promise<T> => {
+  try {
+    return await promise
+  } catch (err) {
+    console.error(err)
+    captureException(err)
+    throw err
   }
 }
 
@@ -116,4 +136,8 @@ export const refreshMenuBar = () => {
     name: 'menu-bar',
     type: LaunchType.Background,
   })
+}
+
+export const getWebsiteLogo = (website: string) => {
+  return `https://img.logo.dev/${website}?token=pk_X-1ZO13GSgeOoUrIuJ6GMQ&size=180&retina=true`
 }

@@ -22,7 +22,7 @@ function MenuBar() {
   const { data: trackerProjectsData, isLoading: isLoadingTrackerProjects } = useQuery(queryKeys.trackerProjects.list())
 
   const checkTimerMutation = useMutation({
-    mutationFn: api.getTimerStatus,
+    mutationFn: api.tracker.timer.getStatus,
     onSuccess: ({ data }) => {
       if (data.isRunning) {
         setCurrentInterval(data.elapsedTime)

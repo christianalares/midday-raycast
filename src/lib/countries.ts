@@ -1549,4 +1549,14 @@ export const countries = {
   },
 } as const
 
+export const getCountryEmojiByCountryName = (countryName: string) => {
+  const foundCountry = Object.values(countries).find((country) => country.name === countryName)
+
+  if (foundCountry) {
+    return foundCountry.emoji
+  }
+
+  return null
+}
+
 export type Country = (typeof countries)[keyof typeof countries]

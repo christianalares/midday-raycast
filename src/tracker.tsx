@@ -53,7 +53,7 @@ const ProjectListItem = ({ project, showDetails, setShowDetails }: ProjectListIt
   const queryClient = useQueryClient()
 
   const startTrackerTimerMutation = useMutation({
-    mutationFn: api.startTrackerTimer,
+    mutationFn: api.tracker.timer.start,
     meta: {
       toastTitle: {
         loading: 'Starting timer...',
@@ -74,7 +74,7 @@ const ProjectListItem = ({ project, showDetails, setShowDetails }: ProjectListIt
   })
 
   const stopTrackerTimerMutation = useMutation({
-    mutationFn: api.stopTrackerTimer,
+    mutationFn: api.tracker.timer.stop,
     meta: {
       toastTitle: {
         loading: 'Stopping timer...',

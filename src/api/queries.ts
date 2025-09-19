@@ -1,30 +1,28 @@
 import { queryOptions, type QueryOptions } from '@tanstack/react-query'
-import {
-  api,
-  type GetPreSignedTransactionAttachmentUrlArgs,
-  type GetTrackerEntriesArgs,
-  type GetTransactionsArgs,
-  type GetDocumentsArgs,
-} from '.'
+import { api } from '.'
+import type { GetDocumentsArgs } from './documents'
+import type { GetTrackerEntriesArgs } from './tracker'
+import type { GetTransactionsArgs } from './transactions'
+import type { GetPreSignedTransactionAttachmentUrlArgs } from './transactions'
 
 export const queryKeys = {
   globalSearch: (q?: string) => {
     return queryOptions({
       queryKey: ['global-search', q],
-      queryFn: () => api.globalSearch(q),
+      queryFn: () => api.search.global(q),
     })
   },
   documents: {
     list: (args: GetDocumentsArgs) => {
       return queryOptions({
         queryKey: ['documents', args],
-        queryFn: () => api.getDocuments(args),
+        queryFn: () => api.documents.get(args),
       })
     },
     getById: (id: string) => {
       return queryOptions({
         queryKey: ['documents', id],
-        queryFn: () => api.getDocumentById(id),
+        queryFn: () => api.documents.getById(id),
       })
     },
   },
@@ -32,7 +30,7 @@ export const queryKeys = {
     list: ({ from, to }: { from: Date; to: Date }) => {
       return queryOptions({
         queryKey: ['spendings', { from, to }],
-        queryFn: () => api.getSpendings({ from, to }),
+        queryFn: () => api.reports.getSpendings({ from, to }),
       })
     },
   },
@@ -40,7 +38,7 @@ export const queryKeys = {
     list: () => {
       return queryOptions({
         queryKey: ['tracker-projects'],
-        queryFn: () => api.getTrackerProjects(),
+        queryFn: () => api.tracker.projects.get(),
       })
     },
   },
@@ -48,7 +46,7 @@ export const queryKeys = {
     getByProjectId: (args: GetTrackerEntriesArgs) => {
       return queryOptions({
         queryKey: ['tracker-entries', args],
-        queryFn: () => api.getTrackerEntries(args),
+        queryFn: () => api.tracker.entries.get(args),
       })
     },
   },
@@ -56,7 +54,7 @@ export const queryKeys = {
     status: () => {
       return queryOptions({
         queryKey: ['tracker-timer', 'status'],
-        queryFn: () => api.getTimerStatus(),
+        queryFn: () => api.tracker.timer.getStatus(),
       })
     },
   },
@@ -64,27 +62,33 @@ export const queryKeys = {
     list: (args: GetTransactionsArgs) => {
       return queryOptions({
         queryKey: ['transactions', args],
-        queryFn: () => api.getTransactions(args),
+        queryFn: () => api.transactions.get(args),
       })
     },
     getById: (id: string) => {
       return queryOptions({
         queryKey: ['transactions', id],
-        queryFn: () => api.getTransactionById(id),
+        queryFn: () => api.transactions.getById(id),
       })
     },
     getAttachmentPreSignedUrl: (args: GetPreSignedTransactionAttachmentUrlArgs) => {
       return queryOptions({
         queryKey: ['transactions', args.transactionId, 'pre-signed-attachment-url', args.attachmentId],
-        queryFn: () => api.getPreSignedTransactionAttachmentUrl(args),
+        queryFn: () => api.transactions.getPreSignedAttachmentUrl(args),
       })
     },
   },
   customers: {
+    list: () => {
+      return queryOptions({
+        queryKey: ['customers'],
+        queryFn: () => api.customers.list(),
+      })
+    },
     getById: (id: string) => {
       return queryOptions({
         queryKey: ['customers', id],
-        queryFn: () => api.getCustomer(id),
+        queryFn: () => api.customers.getById(id),
       })
     },
   },

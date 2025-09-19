@@ -16,7 +16,7 @@ const CreateTrackerEntry = ({ projectId, initialValues }: Props) => {
   const queryClient = useQueryClient()
 
   const createTrackerEntryMutation = useMutation({
-    mutationFn: api.createTrackerEntry,
+    mutationFn: api.tracker.entries.create,
     meta: {
       toastTitle: {
         loading: 'Creating tracker entry...',

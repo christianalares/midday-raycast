@@ -11,7 +11,7 @@ const CreateCustomer = () => {
   const navigation = useNavigation()
 
   const createCustomerMutation = useMutation({
-    mutationFn: api.createCustomer,
+    mutationFn: api.customers.create,
     onSuccess: (createdCustomer) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.globalSearch().queryKey })
       navigation.push(<Search selectedId={createdCustomer.id} />)

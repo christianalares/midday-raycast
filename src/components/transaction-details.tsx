@@ -1,6 +1,5 @@
 import { Color, Icon, List } from '@raycast/api'
-import { useQuery } from '@tanstack/react-query'
-import { queryKeys, QueryResults } from '../api/queries'
+import { QueryResults } from '../api/queries'
 import { formatCurrency } from '../lib/utils'
 
 type Props = {

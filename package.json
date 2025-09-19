@@ -10,6 +10,17 @@
     "Productivity"
   ],
   "license": "MIT",
+  "commandsNotReady": [
+    {
+      "COMMENT": "commandsNotReady is not a real thing, it's just for saving the command for later when it's ready to be used"
+    },
+    {
+      "name": "search",
+      "title": "Search",
+      "description": "Search your transactions and invoices",
+      "mode": "view"
+    }
+  ],
   "commands": [
     {
       "name": "menu-bar",
@@ -20,15 +31,15 @@
       "interval": "10s"
     },
     {
-      "name": "search",
-      "title": "Search",
-      "description": "Search your transactions and invoices",
-      "mode": "view"
-    },
-    {
       "name": "transactions",
       "title": "Transactions",
       "description": "View and search your transactions",
+      "mode": "view"
+    },
+    {
+      "name": "customers",
+      "title": "Customers",
+      "description": "View and search your customers",
       "mode": "view"
     },
     {

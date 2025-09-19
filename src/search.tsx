@@ -9,7 +9,7 @@ import { api } from './api'
 import { useToggleState } from './hooks/use-toggle-state'
 import { formatSize, getCountryByCode } from './lib/utils'
 import EditCustomer from './edit-customer'
-import { TransactionDetails } from './components/transaction-details'
+// import { TransactionDetails } from './components/transaction-details'
 
 type Props = {
   selectedId?: string
@@ -129,7 +129,7 @@ const CustomersList = ({
   const queryClient = useQueryClient()
 
   const deleteCustomerMutation = useMutation({
-    mutationFn: api.deleteCustomer,
+    mutationFn: api.customers.delete,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [queryKeys.globalSearch().queryKey.at(0)] })
     },
@@ -273,7 +273,8 @@ const TransactionsList = ({
           id={result.id}
           title={result.data.name}
           icon={Icon.List}
-          detail={<TransactionDetails transactionId={result.id} />}
+          // TODO: Add transaction details
+          // detail={<TransactionDetails transaction={result.data} />}
           actions={
             <ActionPanel>
               <Action
@@ -286,8 +287,6 @@ const TransactionsList = ({
         />
       ))}
 
-      {/*  */}
-      {/* <List.Item title="Create transaction" icon={Icon.ArrowNe} /> */}
       <List.Item
         title="View all transactions"
         id="view-transactions"

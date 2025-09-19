@@ -1,8 +1,8 @@
 import { Action, ActionPanel, Form } from '@raycast/api'
 import { FormValidation, useForm } from '@raycast/utils'
-import { type CreateCustomerArgs } from '../../api'
 import { countries } from '../../lib/countries'
 import { cleanFormProps } from '../../lib/utils'
+import type { CreateCustomerArgs } from '../../api/customers'
 
 type Customer = CreateCustomerArgs
 
