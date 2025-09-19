@@ -80,7 +80,7 @@ const TrackerEntries = ({ projectId, from, to }: Props) => {
         title={new Intl.DateTimeFormat(undefined, { month: 'long' }).format(currentMonth)}
         subtitle={subTitle}
       >
-        {daysWithEntries.map((day, i) => (
+        {daysWithEntries.map((day) => (
           <List.Item
             id={day.date.toISOString().split('T')[0]}
             key={day.date.toISOString()}
