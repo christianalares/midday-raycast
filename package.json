@@ -19,9 +19,7 @@
       "title": "Search",
       "description": "Search your transactions and invoices",
       "mode": "view"
-    }
-  ],
-  "commands": [
+    },
     {
       "name": "menu-bar",
       "title": "Menu Bar",
@@ -29,11 +27,19 @@
       "description": "View Midday data in the menu bar",
       "mode": "menu-bar",
       "interval": "10s"
-    },
+    }
+  ],
+  "commands": [
     {
       "name": "transactions",
       "title": "Transactions",
       "description": "View and search your transactions",
+      "mode": "view"
+    },
+    {
+      "name": "invoices",
+      "title": "Invoices",
+      "description": "View and search your invoices",
       "mode": "view"
     },
     {

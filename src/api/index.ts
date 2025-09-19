@@ -4,6 +4,7 @@ import { search } from './search'
 import { customers } from './customers'
 import { documents } from './documents'
 import { tracker } from './tracker'
+import { invoices } from './invoices'
 
 export const api = {
   transactions,
@@ -12,4 +13,5 @@ export const api = {
   customers,
   documents,
   tracker,
+  invoices,
 }

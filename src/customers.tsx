@@ -1,20 +1,10 @@
 import { Action, ActionPanel, Icon, Image, List } from '@raycast/api'
 import { useQuery } from '@tanstack/react-query'
-import { queryKeys, QueryResults } from './api/queries'
+import { queryKeys } from './api/queries'
 import { useToggleState } from './hooks/use-toggle-state'
 import { getCountryEmojiByCountryName } from './lib/countries'
-import { getWebsiteLogo } from './lib/utils'
+import { getCustomerWebsite } from './lib/utils'
 import { withMiddayClient } from './lib/with-midday-client'
-
-const getCustomerWebsite = (customer: QueryResults['customers']['list'][number]) => {
-  if (!customer.website || customer.website.trim() === '') {
-    // This constructs a website format based on the customer name
-    // which will generate a logo with the letter of the customer name
-    return getWebsiteLogo(`${customer.name.replace(/ /g, '').toLowerCase()}.com`)
-  }
-
-  return getWebsiteLogo(customer.website)
-}
 
 const Customers = () => {
   const [showDetails, toggleShowDetails] = useToggleState()
@@ -30,7 +20,7 @@ const Customers = () => {
             key={customer.id}
             title={customer.name}
             icon={{
-              source: getCustomerWebsite(customer),
+              source: getCustomerWebsite({ website: customer.website, name: customer.name }),
               mask: Image.Mask.Circle,
             }}
             detail={

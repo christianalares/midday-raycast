@@ -4,6 +4,7 @@ import type { GetDocumentsArgs } from './documents'
 import type { GetTrackerEntriesArgs } from './tracker'
 import type { GetTransactionsArgs } from './transactions'
 import type { GetPreSignedTransactionAttachmentUrlArgs } from './transactions'
+import type { GetInvoicesArgs } from './invoices'
 
 export const queryKeys = {
   globalSearch: (q?: string) => {
@@ -89,6 +90,20 @@ export const queryKeys = {
       return queryOptions({
         queryKey: ['customers', id],
         queryFn: () => api.customers.getById(id),
+      })
+    },
+  },
+  invoices: {
+    list: (args: GetInvoicesArgs) => {
+      return queryOptions({
+        queryKey: ['invoices', args],
+        queryFn: () => api.invoices.list(args),
+      })
+    },
+    getById: (id: string) => {
+      return queryOptions({
+        queryKey: ['invoices', id],
+        queryFn: () => api.invoices.getById(id),
       })
     },
   },

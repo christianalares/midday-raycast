@@ -1,8 +1,8 @@
-import { formatDuration } from 'date-fns'
-import { countries } from './countries'
 import { captureException, launchCommand, LaunchType, type Form } from '@raycast/api'
-import { promises as fs } from 'fs'
 import { runAppleScript } from '@raycast/utils'
+import { formatDuration } from 'date-fns'
+import { promises as fs } from 'fs'
+import { countries } from './countries'
 
 export type Prettify<T> = {
   [K in keyof T]: T[K]
@@ -140,4 +140,16 @@ export const refreshMenuBar = () => {
 
 export const getWebsiteLogo = (website: string) => {
   return `https://img.logo.dev/${website}?token=pk_X-1ZO13GSgeOoUrIuJ6GMQ&size=180&retina=true`
+}
+
+// type A = QueryResults['customers']['list'][number]
+
+export const getCustomerWebsite = (customer: { website: string | null; name: string }) => {
+  if (!customer.website || customer.website.trim() === '') {
+    // This constructs a website format based on the customer name
+    // which will generate a logo with the letter of the customer name
+    return getWebsiteLogo(`${customer.name.replace(/ /g, '').toLowerCase()}.com`)
+  }
+
+  return getWebsiteLogo(customer.website)
 }
