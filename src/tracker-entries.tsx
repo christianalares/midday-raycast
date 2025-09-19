@@ -25,8 +25,11 @@ type Props = {
 }
 
 const TrackerEntries = ({ projectId, from, to }: Props) => {
+  const [selectedId, setSelectedId] = useState<string | null>(null)
   const [showDetails, setShowDetails] = useState(false)
   const [currentMonth, setCurrentMonth] = useState(new Date())
+
+  console.log(selectedId)
 
   const { data, isLoading } = useQuery(
     queryKeys.trackerEntries.getByProjectId({
@@ -67,13 +70,19 @@ const TrackerEntries = ({ projectId, from, to }: Props) => {
   const subTitle = [totalAmount, totalDuration, totalEntries].filter(Boolean).join(' / ')
 
   return (
-    <List isLoading={isLoading} isShowingDetail={showDetails}>
+    <List
+      isLoading={isLoading}
+      isShowingDetail={showDetails}
+      selectedItemId={selectedId ?? undefined}
+      onSelectionChange={setSelectedId}
+    >
       <List.Section
         title={new Intl.DateTimeFormat(undefined, { month: 'long' }).format(currentMonth)}
         subtitle={subTitle}
       >
-        {daysWithEntries.map((day) => (
+        {daysWithEntries.map((day, i) => (
           <List.Item
+            id={day.date.toISOString().split('T')[0]}
             key={day.date.toISOString()}
             title={format(day.date, 'EEEE, dd')}
             accessories={day.entries.map((entry) => ({
@@ -115,7 +124,15 @@ const TrackerEntries = ({ projectId, from, to }: Props) => {
                   />
                   <Action
                     title="Today"
-                    onAction={() => setCurrentMonth(new Date())}
+                    onAction={() => {
+                      const now = new Date()
+
+                      setCurrentMonth(now)
+
+                      setTimeout(() => {
+                        setSelectedId(now.toISOString().split('T')[0])
+                      }, 100)
+                    }}
                     shortcut={{ modifiers: ['cmd'], key: 't' }}
                   />
                 </ActionPanel.Section>

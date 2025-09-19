@@ -19,10 +19,18 @@ const Customers = () => {
           <List.Item
             key={customer.id}
             title={customer.name}
+            subtitle={customer.email}
             icon={{
               source: getCustomerWebsite({ website: customer.website, name: customer.name }),
               mask: Image.Mask.Circle,
             }}
+            accessories={[
+              {
+                tooltip: `${customer.invoiceCount} invoices created`,
+                // icon: Icon.Document,
+                text: customer.invoiceCount.toString(),
+              },
+            ]}
             detail={
               <List.Item.Detail
                 metadata={
