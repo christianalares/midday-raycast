@@ -1,14 +1,14 @@
 import { Color, Icon, List } from '@raycast/api'
 import { useQuery } from '@tanstack/react-query'
-import { queryKeys } from '../api/queries'
+import { queryKeys, QueryResults } from '../api/queries'
 import { formatCurrency } from '../lib/utils'
 
 type Props = {
-  transactionId: string
+  transaction: QueryResults['transactions']['list'][number]
 }
 
-export const TransactionDetails = ({ transactionId }: Props) => {
-  const { data: transaction, isLoading } = useQuery(queryKeys.transactions.getById(transactionId))
+export const TransactionDetails = ({ transaction }: Props) => {
+  // const { data: transaction, isLoading } = useQuery(queryKeys.transactions.getById(transactionId))
 
   if (!transaction) {
     return null
@@ -16,8 +16,8 @@ export const TransactionDetails = ({ transactionId }: Props) => {
 
   return (
     <List.Item.Detail
-      isLoading={isLoading}
-      markdown={isLoading ? 'Loading...' : undefined}
+      // isLoading={isLoading}
+      // markdown={isLoading ? 'Loading...' : undefined}
       metadata={
         <List.Item.Detail.Metadata>
           <List.Item.Detail.Metadata.Link

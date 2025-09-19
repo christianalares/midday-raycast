@@ -64,12 +64,7 @@ function Transactions({ selectedId, showInitialDetails }: Props) {
                     : { source: Icon.Circle, tintColor: Color.Orange },
               },
             ]}
-            // actions={
-            //   <ActionPanel>
-            //     <Action.Push title="View Transaction" target={<TransactionDetails transactionId={tx.id} />} />
-            //   </ActionPanel>
-            // }
-            detail={<TransactionDetails transactionId={tx.id} />}
+            detail={<TransactionDetails transaction={tx} />}
             actions={
               <ActionPanel>
                 <Action

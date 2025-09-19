@@ -36,6 +36,7 @@ const getTransactions = async (args: GetTransactionsArgs) => {
 }
 
 const getTransactionById = async (id: string) => {
+  console.log('🔍 Getting transaction by id', id)
   const midday = getMiddayClient()
 
   const transaction = await tryCatch(midday.transactions.get({ id }))
